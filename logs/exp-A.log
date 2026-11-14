@@ -1,344 +1,255 @@
-[16:35:55] === A1: ДЕФЕКТ readiness до прогрева (readyBeforeWarmup=true, warm=20s)
+[16:55:11] === A1: ДЕФЕКТ readiness до прогрева (readyBeforeWarmup=true, warm=20s)
 Release "hw11" has been upgraded. Happy Helming!
 NAME: hw11
-LAST DEPLOYED: Sat Nov 14 16:35:55 2026
+LAST DEPLOYED: Sat Nov 14 16:55:11 2026
 NAMESPACE: default
 STATUS: deployed
-REVISION: 6
+REVISION: 25
 TEST SUITE: None
---- snapshot после helm upgrade (дефект) 16:35:56
-hw11-service-58bc56f9d-75bj4 Running [True]
-hw11-service-58bc56f9d-xj8dv Running [True]
-endpoints: [['10.244.0.50'], ['10.244.0.51']] ready: [True, True]
-[16:35:56] нагрузка сразу после upgrade; 2 rps на 30 с
+--- snapshot после helm upgrade (дефект) 16:55:12
+hw11-service-568f69b579-nbq62 Running [True]
+hw11-service-568f69b579-wnjd6 Running [True]
+hw11-service-77568fb6f4-sc625 Pending [False]
+endpoints: [['10.244.0.91'], ['10.244.0.93']] ready: [True, True]
+[16:55:12] нагрузка сразу после upgrade; 2 rps на 30 с
 pod/loadgen-pod created
---- snapshot клиент запущен (дефектный прогрев) 16:35:56
-hw11-service-58bc56f9d-75bj4 Running [True]
-hw11-service-58bc56f9d-xj8dv Running [True]
-endpoints: [['10.244.0.50'], ['10.244.0.51']] ready: [True, True]
---- snapshot середина прогрева (дефект): Ready-поды получают трафик 16:36:04
-hw11-service-58bc56f9d-75bj4 Running [True]
-hw11-service-58bc56f9d-xj8dv Running [True]
-endpoints: [['10.244.0.50'], ['10.244.0.51']] ready: [True, True]
+--- snapshot клиент запущен (дефектный прогрев) 16:55:12
+hw11-service-568f69b579-nbq62 Running [True]
+hw11-service-568f69b579-wnjd6 Running [True]
+hw11-service-77568fb6f4-sc625 Pending [False]
+endpoints: [['10.244.0.91'], ['10.244.0.93']] ready: [True, True]
+--- snapshot середина прогрева (дефект): Ready-поды получают трафик 16:55:20
+hw11-service-77568fb6f4-sc625 Running [True]
+hw11-service-77568fb6f4-tg69c Running [True]
+endpoints: [['10.244.0.94'], ['10.244.0.96']] ready: [True, True]
 pod/loadgen-pod condition met
 pod/loadgen-pod condition met
 Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
 pod "loadgen-pod" force deleted
-[16:36:33] A1 итог клиента:
-  записей: 0 | исходы: {}
-[16:36:33] === A2: ИСПРАВЛЕНИЕ readyBeforeWarmup=false, тот же опыт
+[16:55:50] A1 итог клиента:
+  записей: 60 | исходы: {'completed': 58, 'expired': 2}
+  успешных: 58 | p50/p95 TTFC: 1.482/2.534 с | p50/p95 full: 1.835/2.887 с | p50/p95 queue: 1.120/1.942 с
+    pod hw11-service-77568fb6f4-tg69c: 35 шт, TTFC p50 1.891 с, версии ['sim-cpu-v1']
+    pod hw11-service-77568fb6f4-sc625: 23 шт, TTFC p50 0.701 с, версии ['sim-cpu-v1']
+  версии в ответах: {'sim-cpu-v1': 58}
+  замедление генератора (sent−planned): макс 5.019 с, медиана 5.003 с
+[16:55:50] A1 доказательство приёма ДО завершения прогрева (журналы реплик):
+  ИТОГ: 0 из 7 запросов обслужены ДО завершения прогрева своей реплики — прогрев не нарушен
+[16:55:50] === A2: ИСПРАВЛЕНИЕ readyBeforeWarmup=false, тот же опыт
 Release "hw11" has been upgraded. Happy Helming!
 NAME: hw11
-LAST DEPLOYED: Sat Nov 14 16:36:33 2026
+LAST DEPLOYED: Sat Nov 14 16:55:51 2026
 NAMESPACE: default
 STATUS: deployed
-REVISION: 7
+REVISION: 26
 TEST SUITE: None
---- snapshot после helm upgrade (исправление) 16:36:33
-hw11-service-58bc56f9d-75bj4 Running [True]
-hw11-service-58bc56f9d-xj8dv Running [True]
-endpoints: [['10.244.0.50'], ['10.244.0.51']] ready: [True, True]
-[16:36:33] нагрузка сразу после upgrade
+--- snapshot после helm upgrade (исправление) 16:55:51
+hw11-service-6686d588d4-gp25k Pending [False]
+hw11-service-77568fb6f4-sc625 Running [True]
+hw11-service-77568fb6f4-tg69c Running [True]
+endpoints: [['10.244.0.94'], ['10.244.0.96']] ready: [True, True]
+[16:55:51] нагрузка сразу после upgrade
 pod/loadgen-pod created
---- snapshot середина прогрева (исправление): новые поды вне EndpointSlice 16:36:41
-hw11-service-58bc56f9d-75bj4 Running [True]
-hw11-service-58bc56f9d-xj8dv Running [True]
-endpoints: [['10.244.0.50'], ['10.244.0.51']] ready: [True, True]
+--- snapshot середина прогрева (исправление): новые поды вне EndpointSlice 16:55:59
+hw11-service-6686d588d4-gp25k Running [False]
+hw11-service-77568fb6f4-sc625 Running [True]
+hw11-service-77568fb6f4-tg69c Running [True]
+endpoints: [['10.244.0.94'], ['10.244.0.96'], ['10.244.0.97']] ready: [True, True, False]
 pod/loadgen-pod condition met
 pod/loadgen-pod condition met
 Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
 pod "loadgen-pod" force deleted
-[16:37:11] A2 итог клиента:
-  записей: 0 | исходы: {}
-[16:37:11] === A3: rolling update v1→v2 под нагрузкой (grace 30с, длинные стримы)
-Release "hw11" has been upgraded. Happy Helming!
-NAME: hw11
-LAST DEPLOYED: Sat Nov 14 16:37:11 2026
-NAMESPACE: default
-STATUS: deployed
-REVISION: 8
-TEST SUITE: None
-[16:37:11] стабильная A (warm 5с) готова; запуск длинного потока + фоновой нагрузки
-pod/loadgen-pod created
-[16:37:23] начинаю rolling update на v2 (артефакт B) — активные стримы пересекают обновление
-Release "hw11" has been upgraded. Happy Helming!
-NAME: hw11
-LAST DEPLOYED: Sat Nov 14 16:37:24 2026
-NAMESPACE: default
-STATUS: deployed
-REVISION: 9
-TEST SUITE: None
---- snapshot rollout+10с 16:37:34
-hw11-service-58bc56f9d-xj8dv Running [True]
-hw11-service-6f8596c7d-hf282 Running [True]
-hw11-service-6f8596c7d-zhf6w Running [False]
-endpoints: [['10.244.0.51'], ['10.244.0.55'], ['10.244.0.56']] ready: [True, True, False]
---- snapshot rollout+20с 16:37:44
-hw11-service-6f8596c7d-hf282 Running [True]
-hw11-service-6f8596c7d-zhf6w Running [True]
-endpoints: [['10.244.0.55'], ['10.244.0.56']] ready: [True, True]
---- snapshot rollout+30с 16:37:54
-hw11-service-6f8596c7d-hf282 Running [True]
-hw11-service-6f8596c7d-zhf6w Running [True]
-endpoints: [['10.244.0.55'], ['10.244.0.56']] ready: [True, True]
---- snapshot rollout+40с 16:38:04
-hw11-service-6f8596c7d-hf282 Running [True]
-hw11-service-6f8596c7d-zhf6w Running [True]
-endpoints: [['10.244.0.55'], ['10.244.0.56']] ready: [True, True]
---- snapshot rollout+50с 16:38:14
-hw11-service-6f8596c7d-hf282 Running [True]
-hw11-service-6f8596c7d-zhf6w Running [True]
-endpoints: [['10.244.0.55'], ['10.244.0.56']] ready: [True, True]
---- snapshot rollout+60с 16:38:25
-hw11-service-6f8596c7d-hf282 Running [True]
-hw11-service-6f8596c7d-zhf6w Running [True]
-endpoints: [['10.244.0.55'], ['10.244.0.56']] ready: [True, True]
---- snapshot rollout+70с 16:38:35
-hw11-service-6f8596c7d-hf282 Running [True]
-hw11-service-6f8596c7d-zhf6w Running [True]
-endpoints: [['10.244.0.55'], ['10.244.0.56']] ready: [True, True]
---- snapshot rollout+80с 16:38:45
-hw11-service-6f8596c7d-hf282 Running [True]
-hw11-service-6f8596c7d-zhf6w Running [True]
-endpoints: [['10.244.0.55'], ['10.244.0.56']] ready: [True, True]
---- snapshot rollout+90с 16:38:55
-hw11-service-6f8596c7d-hf282 Running [True]
-hw11-service-6f8596c7d-zhf6w Running [True]
-endpoints: [['10.244.0.55'], ['10.244.0.56']] ready: [True, True]
---- snapshot rollout+100с 16:39:05
-hw11-service-6f8596c7d-hf282 Running [True]
-hw11-service-6f8596c7d-zhf6w Running [True]
-endpoints: [['10.244.0.55'], ['10.244.0.56']] ready: [True, True]
---- snapshot rollout+110с 16:39:15
-hw11-service-6f8596c7d-hf282 Running [True]
-hw11-service-6f8596c7d-zhf6w Running [True]
-endpoints: [['10.244.0.55'], ['10.244.0.56']] ready: [True, True]
---- snapshot rollout+120с 16:39:25
-hw11-service-6f8596c7d-hf282 Running [True]
-hw11-service-6f8596c7d-zhf6w Running [True]
-endpoints: [['10.244.0.55'], ['10.244.0.56']] ready: [True, True]
-[16:39:50] === A1: ДЕФЕКТ readiness до прогрева (readyBeforeWarmup=true, warm=20s)
-Release "hw11" has been upgraded. Happy Helming!
-NAME: hw11
-LAST DEPLOYED: Sat Nov 14 16:39:50 2026
-NAMESPACE: default
-STATUS: deployed
-REVISION: 11
-TEST SUITE: None
---- snapshot после helm upgrade (дефект) 16:39:51
-hw11-service-58bc56f9d-kg7sx Running [False]
-hw11-service-6f8596c7d-hf282 Running [True]
-hw11-service-6f8596c7d-zhf6w Running [True]
-endpoints: [['10.244.0.55'], ['10.244.0.56'], ['10.244.0.57']] ready: [True, True, False]
-[16:39:51] нагрузка сразу после upgrade; 2 rps на 30 с
-pod/loadgen-pod created
---- snapshot клиент запущен (дефектный прогрев) 16:39:51
-hw11-service-58bc56f9d-kg7sx Running [False]
-hw11-service-6f8596c7d-hf282 Running [True]
-hw11-service-6f8596c7d-zhf6w Running [True]
-endpoints: [['10.244.0.55'], ['10.244.0.56'], ['10.244.0.57']] ready: [True, True, False]
---- snapshot середина прогрева (дефект): Ready-поды получают трафик 16:39:59
-hw11-service-58bc56f9d-kg7sx Running [True]
-hw11-service-58bc56f9d-tcrd5 Running [True]
-endpoints: [['10.244.0.57'], ['10.244.0.59']] ready: [True, True]
-pod/loadgen-pod condition met
-pod/loadgen-pod condition met
-Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
-pod "loadgen-pod" force deleted
-[16:40:29] A1 итог клиента:
+[16:56:30] A2 итог клиента:
   записей: 60 | исходы: {'completed': 60}
-  успешных: 60 | p50/p95 TTFC: 1.344/2.264 с | p50/p95 full: 1.696/2.615 с | p50/p95 queue: 1.068/1.838 с
-    pod hw11-service-58bc56f9d-kg7sx: 34 шт, TTFC p50 1.826 с, версии ['sim-cpu-v1']
-    pod hw11-service-58bc56f9d-tcrd5: 26 шт, TTFC p50 0.700 с, версии ['sim-cpu-v1']
+  успешных: 60 | p50/p95 TTFC: 0.402/2.026 с | p50/p95 full: 0.754/2.378 с | p50/p95 queue: 0.053/1.472 с
+    pod hw11-service-77568fb6f4-sc625: 36 шт, TTFC p50 0.896 с, версии ['sim-cpu-v1']
+    pod hw11-service-77568fb6f4-tg69c: 15 шт, TTFC p50 0.401 с, версии ['sim-cpu-v1']
+    pod hw11-service-6686d588d4-gp25k: 9 шт, TTFC p50 0.701 с, версии ['sim-cpu-v1']
   версии в ответах: {'sim-cpu-v1': 60}
-  замедление генератора (sent−planned): макс 5.018 с, медиана 5.003 с
-[16:40:29] === A2: ИСПРАВЛЕНИЕ readyBeforeWarmup=false, тот же опыт
+  замедление генератора (sent−planned): макс 5.014 с, медиана 5.003 с
+[16:56:30] === A3: rolling update v1→v2 под нагрузкой (grace 30с, длинные стримы)
 Release "hw11" has been upgraded. Happy Helming!
 NAME: hw11
-LAST DEPLOYED: Sat Nov 14 16:40:29 2026
+LAST DEPLOYED: Sat Nov 14 16:56:31 2026
 NAMESPACE: default
 STATUS: deployed
-REVISION: 12
+REVISION: 27
 TEST SUITE: None
---- snapshot после helm upgrade (исправление) 16:40:30
-hw11-service-58bc56f9d-kg7sx Running [True]
-hw11-service-58bc56f9d-tcrd5 Running [True]
-endpoints: [['10.244.0.57'], ['10.244.0.59']] ready: [True, True]
-[16:40:30] нагрузка сразу после upgrade
+[16:56:43] стабильная A (warm 5с) готова; запуск длинного потока + фоновой нагрузки
 pod/loadgen-pod created
---- snapshot середина прогрева (исправление): новые поды вне EndpointSlice 16:40:38
-hw11-service-58bc56f9d-kg7sx Running [True]
-hw11-service-58bc56f9d-tcrd5 Running [True]
-endpoints: [['10.244.0.57'], ['10.244.0.59']] ready: [True, True]
-pod/loadgen-pod condition met
-pod/loadgen-pod condition met
-Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
-pod "loadgen-pod" force deleted
-[16:41:07] A2 итог клиента:
-  записей: 60 | исходы: {'completed': 60}
-  успешных: 60 | p50/p95 TTFC: 0.401/0.402 с | p50/p95 full: 0.754/0.754 с | p50/p95 queue: 0.000/0.000 с
-    pod hw11-service-58bc56f9d-tcrd5: 30 шт, TTFC p50 0.401 с, версии ['sim-cpu-v1']
-    pod hw11-service-58bc56f9d-kg7sx: 30 шт, TTFC p50 0.401 с, версии ['sim-cpu-v1']
-  версии в ответах: {'sim-cpu-v1': 60}
-  замедление генератора (sent−planned): макс 5.008 с, медиана 5.003 с
-[16:41:07] === A3: rolling update v1→v2 под нагрузкой (grace 30с, длинные стримы)
+[16:56:55] начинаю rolling update на v2 (артефакт B) — активные стримы пересекают обновление
 Release "hw11" has been upgraded. Happy Helming!
 NAME: hw11
-LAST DEPLOYED: Sat Nov 14 16:41:07 2026
+LAST DEPLOYED: Sat Nov 14 16:56:56 2026
 NAMESPACE: default
 STATUS: deployed
-REVISION: 13
+REVISION: 28
 TEST SUITE: None
-[16:41:08] стабильная A (warm 5с) готова; запуск длинного потока + фоновой нагрузки
-pod/loadgen-pod created
-[16:41:20] начинаю rolling update на v2 (артефакт B) — активные стримы пересекают обновление
-Release "hw11" has been upgraded. Happy Helming!
-NAME: hw11
-LAST DEPLOYED: Sat Nov 14 16:41:20 2026
-NAMESPACE: default
-STATUS: deployed
-REVISION: 14
-TEST SUITE: None
---- snapshot rollout+10с 16:41:31
-hw11-service-58bc56f9d-tcrd5 Running [True]
-hw11-service-6f8596c7d-8dzjd Running [False]
-hw11-service-6f8596c7d-fzp5s Running [True]
-endpoints: [['10.244.0.59'], ['10.244.0.65'], ['10.244.0.67']] ready: [True, True, False]
---- snapshot rollout+20с 16:41:41
-hw11-service-6f8596c7d-8dzjd Running [True]
-hw11-service-6f8596c7d-fzp5s Running [True]
-endpoints: [['10.244.0.65'], ['10.244.0.67']] ready: [True, True]
---- snapshot rollout+30с 16:41:51
-hw11-service-6f8596c7d-8dzjd Running [True]
-hw11-service-6f8596c7d-fzp5s Running [True]
-endpoints: [['10.244.0.65'], ['10.244.0.67']] ready: [True, True]
---- snapshot rollout+40с 16:42:01
-hw11-service-6f8596c7d-8dzjd Running [True]
-hw11-service-6f8596c7d-fzp5s Running [True]
-endpoints: [['10.244.0.65'], ['10.244.0.67']] ready: [True, True]
---- snapshot rollout+50с 16:42:11
-hw11-service-6f8596c7d-8dzjd Running [True]
-hw11-service-6f8596c7d-fzp5s Running [True]
-endpoints: [['10.244.0.65'], ['10.244.0.67']] ready: [True, True]
---- snapshot rollout+60с 16:42:21
-hw11-service-6f8596c7d-8dzjd Running [True]
-hw11-service-6f8596c7d-fzp5s Running [True]
-endpoints: [['10.244.0.65'], ['10.244.0.67']] ready: [True, True]
---- snapshot rollout+70с 16:42:31
-hw11-service-6f8596c7d-8dzjd Running [True]
-hw11-service-6f8596c7d-fzp5s Running [True]
-endpoints: [['10.244.0.65'], ['10.244.0.67']] ready: [True, True]
---- snapshot rollout+80с 16:42:41
-hw11-service-6f8596c7d-8dzjd Running [True]
-hw11-service-6f8596c7d-fzp5s Running [True]
-endpoints: [['10.244.0.65'], ['10.244.0.67']] ready: [True, True]
---- snapshot rollout+90с 16:42:51
-hw11-service-6f8596c7d-8dzjd Running [True]
-hw11-service-6f8596c7d-fzp5s Running [True]
-hw11-service-6f8596c7d-zwczn Running [True]
-endpoints: [['10.244.0.65'], ['10.244.0.67'], ['10.244.0.68']] ready: [True, True, True]
---- snapshot rollout+100с 16:43:02
-hw11-service-6f8596c7d-8dzjd Running [True]
-hw11-service-6f8596c7d-fzp5s Running [True]
-hw11-service-6f8596c7d-zwczn Running [True]
-endpoints: [['10.244.0.65'], ['10.244.0.67'], ['10.244.0.68']] ready: [True, True, True]
---- snapshot rollout+110с 16:43:12
-hw11-service-6f8596c7d-8dzjd Running [True]
-hw11-service-6f8596c7d-fzp5s Running [True]
-hw11-service-6f8596c7d-zwczn Running [True]
-endpoints: [['10.244.0.65'], ['10.244.0.67'], ['10.244.0.68']] ready: [True, True, True]
---- snapshot rollout+120с 16:43:22
-hw11-service-6f8596c7d-8dzjd Running [True]
-hw11-service-6f8596c7d-fzp5s Running [True]
-hw11-service-6f8596c7d-zwczn Running [True]
-endpoints: [['10.244.0.65'], ['10.244.0.67'], ['10.244.0.68']] ready: [True, True, True]
+--- snapshot rollout+10с 16:57:06
+hw11-service-568f69b579-78rj2 Running [False]
+hw11-service-568f69b579-rp6kc Running [True]
+hw11-service-576f58f888-78v4r Running [False]
+hw11-service-576f58f888-wqhms Running [True]
+endpoints: [['10.244.0.100'], ['10.244.0.101'], ['10.244.0.103'], ['10.244.0.104']] ready: [False, True, True, False]
+--- snapshot rollout+20с 16:57:16
+hw11-service-568f69b579-78rj2 Running [False]
+hw11-service-568f69b579-rp6kc Running [False]
+hw11-service-576f58f888-78v4r Running [True]
+hw11-service-576f58f888-wqhms Running [True]
+endpoints: [['10.244.0.100'], ['10.244.0.101'], ['10.244.0.103'], ['10.244.0.104']] ready: [False, False, True, True]
+--- snapshot rollout+30с 16:57:26
+hw11-service-568f69b579-rp6kc Running [False]
+hw11-service-576f58f888-78v4r Running [True]
+hw11-service-576f58f888-wqhms Running [True]
+endpoints: [['10.244.0.101'], ['10.244.0.103'], ['10.244.0.104']] ready: [False, True, True]
+--- snapshot rollout+40с 16:57:36
+hw11-service-576f58f888-78v4r Running [True]
+hw11-service-576f58f888-wqhms Running [True]
+endpoints: [['10.244.0.103'], ['10.244.0.104']] ready: [True, True]
+--- snapshot rollout+50с 16:57:46
+hw11-service-576f58f888-78v4r Running [True]
+hw11-service-576f58f888-wqhms Running [True]
+endpoints: [['10.244.0.103'], ['10.244.0.104']] ready: [True, True]
+--- snapshot rollout+60с 16:57:57
+hw11-service-576f58f888-78v4r Running [True]
+hw11-service-576f58f888-wqhms Running [True]
+endpoints: [['10.244.0.103'], ['10.244.0.104']] ready: [True, True]
+--- snapshot rollout+70с 16:58:07
+hw11-service-576f58f888-78v4r Running [True]
+hw11-service-576f58f888-wqhms Running [True]
+endpoints: [['10.244.0.103'], ['10.244.0.104']] ready: [True, True]
+--- snapshot rollout+80с 16:58:17
+hw11-service-576f58f888-78v4r Running [True]
+hw11-service-576f58f888-wqhms Running [True]
+endpoints: [['10.244.0.103'], ['10.244.0.104']] ready: [True, True]
+--- snapshot rollout+90с 16:58:27
+hw11-service-576f58f888-78v4r Running [True]
+hw11-service-576f58f888-wqhms Running [True]
+endpoints: [['10.244.0.103'], ['10.244.0.104']] ready: [True, True]
+--- snapshot rollout+100с 16:58:37
+hw11-service-576f58f888-78v4r Running [True]
+hw11-service-576f58f888-7p9xz Running [True]
+hw11-service-576f58f888-wqhms Running [True]
+endpoints: [['10.244.0.103'], ['10.244.0.104'], ['10.244.0.105']] ready: [True, True, True]
+--- snapshot rollout+110с 16:58:47
+hw11-service-576f58f888-78v4r Running [True]
+hw11-service-576f58f888-7p9xz Running [True]
+hw11-service-576f58f888-wqhms Running [True]
+endpoints: [['10.244.0.103'], ['10.244.0.104'], ['10.244.0.105']] ready: [True, True, True]
+--- snapshot rollout+120с 16:58:57
+hw11-service-576f58f888-78v4r Running [True]
+hw11-service-576f58f888-7p9xz Running [True]
+hw11-service-576f58f888-wqhms Running [True]
+endpoints: [['10.244.0.103'], ['10.244.0.104'], ['10.244.0.105']] ready: [True, True, True]
 error: timed out waiting for the condition on pods/loadgen-pod
 pod/loadgen-pod condition met
 Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
 pod "loadgen-pod" force deleted
-[16:43:52] A3 итог клиента (ожидание: 0 rejected, 0 interrupted, версии v1 и v2 в окне):
-  записей: 135 | исходы: {'completed': 135}
-  успешных: 135 | p50/p95 TTFC: 1.124/2.632 с | p50/p95 full: 1.475/2.984 с | p50/p95 queue: 0.884/2.316 с
-    pod hw11-service-6f8596c7d-fzp5s: 96 шт, TTFC p50 1.817 с, версии ['sim-cpu-v2']
-    pod hw11-service-58bc56f9d-tcrd5: 15 шт, TTFC p50 0.401 с, версии ['sim-cpu-v1']
-    pod hw11-service-6f8596c7d-8dzjd: 13 шт, TTFC p50 0.701 с, версии ['sim-cpu-v2']
-    pod hw11-service-58bc56f9d-kg7sx: 11 шт, TTFC p50 0.401 с, версии ['sim-cpu-v1']
-  версии в ответах: {'sim-cpu-v1': 26, 'sim-cpu-v2': 109}
-  замедление генератора (sent−planned): макс 5.015 с, медиана 5.004 с
-[16:43:52] === A4: заведомо неготовая B (битый хеш артефакта) → исключение из трафика
+[16:59:28] A3 итог клиента (ожидание: 0 rejected, 0 interrupted, версии v1 и v2 в окне):
+  записей: 135 | исходы: {'completed': 134, 'expired': 1}
+  успешных: 134 | p50/p95 TTFC: 8.463/24.263 с | p50/p95 full: 9.271/24.790 с | p50/p95 queue: 8.120/23.949 с
+    pod hw11-service-576f58f888-78v4r: 70 шт, TTFC p50 6.062 с, версии ['sim-cpu-v2']
+    pod hw11-service-576f58f888-wqhms: 36 шт, TTFC p50 9.946 с, версии ['sim-cpu-v2']
+    pod hw11-service-568f69b579-78rj2: 14 шт, TTFC p50 2.362 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-rp6kc: 14 шт, TTFC p50 10.057 с, версии ['sim-cpu-v1']
+  версии в ответах: {'sim-cpu-v1': 28, 'sim-cpu-v2': 106}
+  замедление генератора (sent−planned): макс 5.019 с, медиана 5.004 с
+[16:59:28] === A4: заведомо неготовая B (битый хеш артефакта) → исключение из трафика
 Release "hw11" has been upgraded. Happy Helming!
 NAME: hw11
-LAST DEPLOYED: Sat Nov 14 16:43:52 2026
+LAST DEPLOYED: Sat Nov 14 16:59:28 2026
 NAMESPACE: default
 STATUS: deployed
-REVISION: 15
+REVISION: 29
 TEST SUITE: None
---- snapshot неготовая B: Ready и EndpointSlice 16:44:13
-hw11-service-6f8596c7d-8dzjd Running [True]
-hw11-service-6f8596c7d-fzp5s Running [True]
-hw11-service-7555695cfd-hnqjg Running [False]
-endpoints: [['10.244.0.65'], ['10.244.0.67'], ['10.244.0.69']] ready: [True, True, False]
-[16:44:13] EndpointSlice обязан содержать только A; проверка версия по ответам
+--- snapshot неготовая B: Ready и EndpointSlice 16:59:48
+hw11-service-576f58f888-78v4r Running [True]
+hw11-service-576f58f888-wqhms Running [True]
+hw11-service-6457f9f4cb-sxthp Running [False]
+endpoints: [['10.244.0.103'], ['10.244.0.104'], ['10.244.0.106']] ready: [True, True, False]
+[16:59:49] EndpointSlice обязан содержать только A; проверка версия по ответам
 pod/loadgen-pod created
 pod/loadgen-pod condition met
 pod/loadgen-pod condition met
 Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
 pod "loadgen-pod" force deleted
   записей: 5 | исходы: {'completed': 5}
-  успешных: 5 | p50/p95 TTFC: 0.402/0.701 с | p50/p95 full: 0.755/1.053 с | p50/p95 queue: 0.000/0.000 с
-    pod hw11-service-6f8596c7d-8dzjd: 5 шт, TTFC p50 0.402 с, версии ['sim-cpu-v2']
+  успешных: 5 | p50/p95 TTFC: 0.401/0.402 с | p50/p95 full: 0.755/0.756 с | p50/p95 queue: 0.000/0.000 с
+    pod hw11-service-576f58f888-78v4r: 5 шт, TTFC p50 0.401 с, версии ['sim-cpu-v2']
   версии в ответах: {'sim-cpu-v2': 5}
-  замедление генератора (sent−planned): макс 5.008 с, медиана 5.005 с
-[16:44:30] управляемый откат к A (helm rollback к ревизии v1)
-11      	Sat Nov 14 16:39:50 2026	superseded	hw11-service-0.1.0	v1         	Upgrade complete
-12      	Sat Nov 14 16:40:29 2026	superseded	hw11-service-0.1.0	v1         	Upgrade complete
-13      	Sat Nov 14 16:41:07 2026	superseded	hw11-service-0.1.0	v1         	Upgrade complete
-14      	Sat Nov 14 16:41:20 2026	superseded	hw11-service-0.1.0	v1         	Upgrade complete
-15      	Sat Nov 14 16:43:52 2026	deployed  	hw11-service-0.1.0	v1         	Upgrade complete
-Error: release has no 2 version
-Release "hw11" has been upgraded. Happy Helming!
-NAME: hw11
-LAST DEPLOYED: Sat Nov 14 16:44:30 2026
-NAMESPACE: default
-STATUS: deployed
-REVISION: 16
-TEST SUITE: None
---- snapshot после отката к A 16:44:45
-hw11-service-58bc56f9d-5lj7n Running [True]
-hw11-service-58bc56f9d-bkf5k Running [True]
-hw11-service-6f8596c7d-8dzjd Running [True]
-endpoints: [['10.244.0.67'], ['10.244.0.71'], ['10.244.0.72']] ready: [False, True, True]
-[16:44:45] подтверждение версии по фактическим ответам:
+  замедление генератора (sent−planned): макс 5.010 с, медиана 5.004 с
+[17:00:05] управляемый откат к A (helm rollback к предыдущей ревизии с артефактом v1)
+25      	Sat Nov 14 16:55:11 2026	superseded	hw11-service-0.1.0	v1         	Upgrade complete
+26      	Sat Nov 14 16:55:51 2026	superseded	hw11-service-0.1.0	v1         	Upgrade complete
+27      	Sat Nov 14 16:56:31 2026	superseded	hw11-service-0.1.0	v1         	Upgrade complete
+28      	Sat Nov 14 16:56:56 2026	superseded	hw11-service-0.1.0	v1         	Upgrade complete
+29      	Sat Nov 14 16:59:28 2026	deployed  	hw11-service-0.1.0	v1         	Upgrade complete
+Rollback was a success! Happy Helming!
+--- snapshot после отката к A 17:00:06
+hw11-service-576f58f888-78v4r Running [True]
+hw11-service-576f58f888-wqhms Running [True]
+hw11-service-6457f9f4cb-sxthp Running [False]
+endpoints: [['10.244.0.103'], ['10.244.0.104'], ['10.244.0.106']] ready: [True, True, False]
+[17:00:06] подтверждение версии по фактическим ответам:
 pod/loadgen-pod created
 pod/loadgen-pod condition met
 pod/loadgen-pod condition met
 Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
 pod "loadgen-pod" force deleted
-версии в ответах после отката: {'sim-cpu-v1'} — ожидается только sim-cpu-v1: True
-[16:45:00] === A5: принудительное завершение процесса во время потоковых ответов
+версии в ответах после отката: {'sim-cpu-v2'} — ожидается только sim-cpu-v1: False
+[17:00:20] === A5: принудительное завершение процесса во время потоковых ответов
 Release "hw11" has been upgraded. Happy Helming!
 NAME: hw11
-LAST DEPLOYED: Sat Nov 14 16:45:00 2026
+LAST DEPLOYED: Sat Nov 14 17:00:20 2026
 NAMESPACE: default
 STATUS: deployed
-REVISION: 17
+REVISION: 31
 TEST SUITE: None
 pod/loadgen-pod created
-[16:45:16] kill -9 Pod hw11-service-58bc56f9d-5lj7n во время активных стримов
+[17:00:50] kill -9 Pod hw11-service-568f69b579-p7gq7 (реплика клиента) во время активных стримов
 Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
-pod "hw11-service-58bc56f9d-5lj7n" force deleted
---- snapshot сразу после kill: Endpoints и восстановление 16:45:21
-hw11-service-58bc56f9d-bkf5k Running [True]
-hw11-service-58bc56f9d-qv2fj Running [False]
-endpoints: [['10.244.0.71'], ['10.244.0.75']] ready: [True, False]
+pod "hw11-service-568f69b579-p7gq7" force deleted
+--- snapshot сразу после kill: Endpoints и восстановление 17:00:55
+hw11-service-568f69b579-l8mc2 Running [True]
+hw11-service-568f69b579-tlwpn Running [False]
+endpoints: [['10.244.0.110'], ['10.244.0.112']] ready: [True, False]
 pod/loadgen-pod condition met
 pod/loadgen-pod condition met
 Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
 pod "loadgen-pod" force deleted
-[16:46:08] A5 итог (ожидаем interrupted в клиенте, ok от выжившей реплики):
-  записей: 60 | исходы: {'completed': 60}
-  успешных: 60 | p50/p95 TTFC: 0.401/0.701 с | p50/p95 full: 0.753/1.053 с | p50/p95 queue: 0.000/0.108 с
-    pod hw11-service-58bc56f9d-bkf5k: 60 шт, TTFC p50 0.401 с, версии ['sim-cpu-v1']
-  версии в ответах: {'sim-cpu-v1': 60}
-  замедление генератора (sent−planned): макс 5.007 с, медиана 5.003 с
-[16:46:08] === опыт A завершён
+[17:02:10] A5 итог (ожидаем interrupted в клиенте, ok от выжившей реплики):
+  записей: 60 | исходы: {'completed': 59, 'expired': 1}
+  успешных: 59 | p50/p95 TTFC: 15.373/24.446 с | p50/p95 full: 15.990/28.903 с | p50/p95 queue: 13.990/24.044 с
+    pod hw11-service-568f69b579-l8mc2: 31 шт, TTFC p50 22.214 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-tlwpn: 20 шт, TTFC p50 14.391 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-p7gq7: 8 шт, TTFC p50 0.810 с, версии ['sim-cpu-v1']
+  версии в ответах: {'sim-cpu-v1': 59}
+  замедление генератора (sent−planned): макс 5.022 с, медиана 5.005 с
+[17:02:10] === опыт A завершён
+Release "hw11" has been upgraded. Happy Helming!
+NAME: hw11
+LAST DEPLOYED: Sat Nov 14 17:03:07 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 32
+TEST SUITE: None
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-pod" not found
+pod/loadgen-pod created
+pod/loadgen-pod condition met
+  записей: 50 | исходы: {'completed': 50}
+  успешных: 50 | p50/p95 TTFC: 1.427/3.301 с | p50/p95 full: 1.781/3.654 с | p50/p95 queue: 1.614/2.659 с
+    pod hw11-service-77568fb6f4-2nph2: 28 шт, TTFC p50 2.487 с, версии ['sim-cpu-v1']
+    pod hw11-service-77568fb6f4-cv958: 22 шт, TTFC p50 0.700 с, версии ['sim-cpu-v1']
+  версии в ответах: {'sim-cpu-v1': 50}
+  замедление генератора (sent−planned): макс 5.022 с, медиана 5.004 с
+журнальное доказательство (до WARMUP_DONE):
+  реплики без WARMUP_DONE в журнале (прогрев ещё шёл): ['hw11-service-77568fb6f4-2nph2', 'hw11-service-77568fb6f4-cv958'] — их запросы обслужены непрогретыми
+  ИТОГ: 4 из 4 запросов обслужены ДО завершения прогрева своей реплики — ДЕФЕКТ ПОДТВЕРЖДЁН
+Release "hw11" has been upgraded. Happy Helming!
+NAME: hw11
+LAST DEPLOYED: Sat Nov 14 17:03:48 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 33
+TEST SUITE: None

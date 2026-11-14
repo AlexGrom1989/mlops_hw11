@@ -1,0 +1,24 @@
+Release "hw11" has been upgraded. Happy Helming!
+NAME: hw11
+LAST DEPLOYED: Sat Nov 14 17:03:56 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 34
+TEST SUITE: None
+Waiting for deployment "hw11-service" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "hw11-service" rollout to finish: 1 old replicas are pending termination...
+deployment "hw11-service" successfully rolled out
+[B] подготовка: стабильные 2 реплики
+[B] B1-uniform-plain прогон 1/3 17:04:01
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-0" not found
+pod/loadgen-0 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-1" not found
+pod/loadgen-1 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-2" not found
+pod/loadgen-2 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-3" not found
+pod/loadgen-3 created

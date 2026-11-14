@@ -61,6 +61,8 @@ snapshot "середина прогрева (дефект): Ready-поды по�
 collect_client "$RAW/expA1-defect.jsonl" 120
 say "A1 итог клиента:"
 python3 scripts/summarize.py "$RAW/expA1-defect.jsonl" | tee -a "$LOG"
+say "A1 доказательство приёма ДО завершения прогрева (журналы реплик):"
+python3 scripts/exp_A_warmup_evidence.py | tee -a "$LOG"
 
 # ============================== A2: исправление
 say "=== A2: ИСПРАВЛЕНИЕ readyBeforeWarmup=false, тот же опыт"
@@ -81,10 +83,9 @@ helm upgrade hw11 chart --set image.tag=v4 --set warm.seconds=5 \
   --set warm.readyBeforeWarmup=false --set limits.cpuBurnSeconds=0.25 >>"$LOG" 2>&1
 wait_rollout
 say "стабильная A (warm 5с) готова; запуск длинного потока + фоновой нагрузки"
-# один «длинный» потоковый ответ живёт ~10 с: отдельный клиент-под с 8 чанками
-# и увеличенной межчастевой паузой здесь недоступен (configmap), поэтому
-# длительность создаётся очередью: 6 rps при 0.5 rps/реплику ёмкости.
-start_clients "--url http://hw11-service:8000 --rps 1.5 --duration 90 --stream --sessions 16"
+# «Длительные» потоковые ответы: каждый 15-й запрос с chunk_delay=2 с —
+# полный ответ ~17 с, заведомо пересекает начало обновления и grace-окно.
+start_clients "--url http://hw11-service:8000 --rps 1.5 --duration 90 --stream --sessions 16 --long-every 15"
 sleep 12
 say "начинаю rolling update на v2 (артефакт B) — активные стримы пересекают обновление"
 date +%s.%N > "$RAW/expA3-rollout-start"
@@ -134,10 +135,13 @@ helm upgrade hw11 chart --set image.tag=v4 --set warm.seconds=5 \
   --set warm.readyBeforeWarmup=false --set limits.cpuBurnSeconds=0.25 \
   --set modelVersion=sim-cpu-v1 >>"$LOG" 2>&1
 wait_rollout
-start_clients "--url http://hw11-service:8000 --rps 1 --duration 60 --stream --sessions 8"
+start_clients "--url http://hw11-service:8000 --rps 1 --duration 60 --stream --sessions 8 --long-every 10"
 sleep 15
-VICTIM=$(kubectl get pods -l app=hw11-service -o jsonpath='{.items[0].metadata.name}')
-say "kill -9 Pod $VICTIM во время активных стримов"
+# убиваем именно реплику клиента: имя пода берём из его же первого ответа
+VICTIM=$(kubectl logs loadgen-pod 2>/dev/null | head -1 \
+  | python3 -c "import json,sys; print(json.loads(sys.stdin.readline()).get('pod',''))" 2>/dev/null)
+VICTIM=${VICTIM:-$(kubectl get pods -l app=hw11-service -o jsonpath='{.items[0].metadata.name}')}
+say "kill -9 Pod $VICTIM (реплика клиента) во время активных стримов"
 kubectl delete pod "$VICTIM" --force --grace-period=0 >>"$LOG" 2>&1
 sleep 5
 snapshot "сразу после kill: Endpoints и восстановление"
