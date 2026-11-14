@@ -4,5 +4,4 @@ __pycache__/
 .kind/
 logs-kind.log
 logs-docker-build.log
-results/raw/
 *.tgz

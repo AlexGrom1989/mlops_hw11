@@ -1,0 +1,41 @@
+== фиксация условий стенда перед опытами 2026-11-14 16:42:15
+
+-- диск:
+/dev/nvme0n1p5   231G         115G  105G           53% /
+
+-- память:
+               всего        занят        своб      общая  буф/врем.   доступно
+Память:         14Gi        12Gi       390Mi       168Mi       2.5Gi       2.5Gi
+
+-- CPU:
+16
+
+-- docker/kind/kubectl/helm:
+Docker version 29.8.0, build 88096ef
+kind v0.29.0 go1.24.2 linux/amd64
+  gitVersion: v1.33.4
+v3.18.4+gd80839c
+
+-- версия узла kind:
+/bin/bash: строка 1: kubectl: команда не найдена
+-- размеры образов стенда:
+hw11-loadgen:v4 131MB
+hw11-service:v4 168MB
+hw11-loadgen:v3 131MB
+hw11-service:v3 168MB
+hw11-loadgen:v1 131MB
+hw11-loadgen:v2 131MB
+hw11-service:v1 168MB
+hw11-service:v2 168MB
+quay.io/prometheus-operator/prometheus-config-reloader:v0.95.2 44.5MB
+prefecthq/prefect:3-python3.12 781MB
+quay.io/prometheus/prometheus:v3.16.0 272MB
+python:3.12-slim 119MB
+
+-- прогноз размера стенда при удалении:
+kind-узел (docker volume+образ kindest/node): ~1.6 GiB; загруженные в узел образы входят в volume; helm-релизы: monitoring (~0.5 GiB PV Prometheus), hw11 (~0.1 GiB)
+-- версия узла kind:
+v1.33.1
+-- docker info лимиты:
+cgroup: systemd, runtime: runc
+-- старые теги образов (убраны до сдачи): 

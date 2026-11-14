@@ -143,7 +143,7 @@ async def _startup() -> None:
     asyncio.create_task(STATE.warmup())
 
 
-def _validate(payload) -> tuple[str, list[dict], str, int]:
+def _validate(payload) -> tuple[str, list[dict], str, int, float]:
     """Валидация запроса ДО любого вычисления; HTTPException → 4xx."""
     if not isinstance(payload, dict):
         raise HTTPException(400, "тело запроса должно быть JSON-объектом")
@@ -163,10 +163,14 @@ def _validate(payload) -> tuple[str, list[dict], str, int]:
     if not isinstance(max_chunks, int) or isinstance(max_chunks, bool) \
             or not 1 <= max_chunks <= CHUNK_COUNT:
         raise HTTPException(400, f"max_chunks — целое 1..{CHUNK_COUNT}")
+    chunk_delay = payload.get("chunk_delay", CHUNK_DELAY)
+    if not isinstance(chunk_delay, (int, float)) or isinstance(chunk_delay, bool) \
+            or not 0 <= float(chunk_delay) <= 2:
+        raise HTTPException(400, "chunk_delay — число 0..2")
     session_id = payload.get("session_id")
     if session_id is not None and not isinstance(session_id, str):
         raise HTTPException(400, "session_id должен быть строкой")
-    return prompt, history, session_id or "", max_chunks
+    return prompt, history, session_id or "", max_chunks, float(chunk_delay)
 
 
 def _reject(outcome: str, mode: str, detail, status: int):
@@ -195,7 +199,7 @@ def _summary(mode: str, request_id: str, session_id: str, started: float,
 async def _serve(payload: dict, mode: str):
     """Общая обработка: очередь → стоимость кеша → части ответа → done."""
     started = time.monotonic()
-    prompt, history, session_id, max_chunks = _validate(payload)
+    prompt, history, session_id, max_chunks, chunk_delay = _validate(payload)
     request_id = str(uuid.uuid4())
     prefix = "".join(m.get("content", "") for m in history) + prompt
 
@@ -236,7 +240,7 @@ async def _serve(payload: dict, mode: str):
                     await asyncio.to_thread(_busy)
                 first_at = None
                 for i in range(max_chunks):
-                    await asyncio.sleep(CHUNK_DELAY)
+                    await asyncio.sleep(chunk_delay)
                     if first_at is None:
                         first_at = time.monotonic()
                         TTFC.labels(POD_NAME, mode).observe(first_at - started)

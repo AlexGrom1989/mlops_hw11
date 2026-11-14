@@ -40,9 +40,13 @@ def build_parser() -> argparse.ArgumentParser:
                    help="доля запросов с горячим префиксом (0..1)")
     p.add_argument("--stream", action="store_true")
     p.add_argument("--max-chunks", type=int, default=8)
+    p.add_argument("--long-every", type=int, default=0,
+                   help="каждый N-й запрос — «длительный» потоковый (chunk_delay=2)")
     p.add_argument("--timeout-s", type=float, default=30)
     p.add_argument("--warmup-s", type=float, default=5,
                    help="прогрев соединения и кеша до фазы измерения")
+    p.add_argument("--no-keepalive", action="store_true",
+                   help="Connection: close — каждый запрос балансируется заново")
     return p
 
 
@@ -64,8 +68,12 @@ async def one_request(client: httpx.AsyncClient, url: str, args,
     path = "/generate-stream" if args.stream else "/generate"
     payload = {"prompt": prompt, "messages": messages, "session_id": session_id,
                "max_chunks": args.max_chunks}
+    long = bool(args.long_every and seq % args.long_every == 0)
+    if long:
+        # «Длительный» потоковый ответ: пересекает начало обновления (опыт A).
+        payload["chunk_delay"] = 2.0
     rec = {"client_id": args.client_id, "seq": seq, "session_id": session_id,
-           "hot": hot, "planned_t": round(planned_t, 4),
+           "hot": hot, "long": long, "planned_t": round(planned_t, 4),
            "sent_t": round(time.monotonic() - started, 4),
            "wall_sent": time.time(), "status": None, "pod": None,
            "model_id": None, "artifact_sha256": None, "chunks_seen": 0,
