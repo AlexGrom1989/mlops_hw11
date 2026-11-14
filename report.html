@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Отчёт ДЗ 11 — Kubernetes под нагрузкой</title>
+<style>
+*{box-sizing:border-box}body{overflow-wrap:anywhere;margin:0;background:#f6f8fc;color:#18263d;font:20px/1.65 system-ui,sans-serif}
+main{max-width:1000px;margin:auto;padding:40px 30px 90px}
+h1{font-size:36px;line-height:1.2}h2{font-size:27px;margin-top:46px}h3{font-size:23px}
+a{color:#6341ba}code{font-size:.87em;background:#e8edf6;padding:1px 5px;border-radius:4px}
+pre{font:16px/1.6 ui-monospace,monospace;background:#e8edf6;padding:18px;white-space:pre-wrap;overflow-wrap:anywhere}
+table{width:100%;border-collapse:collapse;font-size:17px;margin:14px 0}
+th:first-child{width:32%}th,td{text-align:left;vertical-align:top;border-bottom:1px solid #cad4e2;padding:9px 12px}
+.note{border-left:4px solid #8866e8;padding:12px 20px;background:#eee9fb;margin:16px 0}
+img{max-width:100%;border:1px solid #cad4e2;border-radius:6px;margin:8px 0}
+.small{font-size:16px;color:#64748b}
+@media print{body{background:white;font-size:12.5pt}main{padding:0}}
+</style></head><body><main>
+
+<h1>ДЗ 11. Сервис работает, пользователи ждут</h1>
+<p class="lead">API выпуска ДЗ 8+9+10 в Kubernetes (kind): прогрев и выпуск, привязка
+к Pod и горячая реплика, HPA и мониторинг. Backend — <code>backend_mode=simulated</code>.</p>
+
+<h2 id="stand">0. Стенд: состав, версии, лимиты</h2>
+<p>Одноузловой <code>kind</code> v0.29.0 (kubernetes v1.33.1, контейнер Docker 29.8.0).
+Сервис — Deployment 2 реплики, обычный Service и Service с
+<code>sessionAffinity: ClientIP</code>, ConfigMap настроек и ConfigMap
+артефакта-имитатора (детерминированные 32 КиБ байтов + sha256; версия артефакта
+восстанавливается после замены Pod — см. проверку <code>pod_replace</code>).
+Helm-чарт параметризует образ, версию модели, прогрев, реплики
+(<code>chart/values.yaml</code>). Версии и ресурсные лимиты —
+<a href="#appendix-stand">приложение</a> и <code>STAND_UP.md</code>; фиксация свободного
+места и памяти хоста перед запусками — <code>logs/stand-baseline.log</code>
+(105 ГБ свободно на диске, ~2,5 ГБ доступной RAM — поэтому оператор Prometheus
+не ставится, стек мониторинга с жёсткими лимитами памяти).</p>
+<table>
+<tr><th>Компонент</th><th>Версия</th><th>Лимит</th></tr>
+<tr><td>сервис (fastapi 0.115.6, uvicorn 0.34.0, prometheus-client 0.21.1)</td><td>hw11-service:v4, python:3.12-slim</td><td>cpu req 300m / lim 1, RAM 128/256Mi</td></tr>
+<tr><td>Prometheus</td><td>v3.16.0, retention 6h, scrape 15s</td><td>RAM 512Mi</td></tr>
+<tr><td>Grafana</td><td>12.3.1</td><td>RAM 256Mi</td></tr>
+<tr><td>kube-state-metrics</td><td>v2.20.0</td><td>RAM 128Mi</td></tr>
+<tr><td>metrics-server</td><td>v0.8.0 (<code>--kubelet-insecure-tls</code> для kind)</td><td>—</td></tr>
+<tr><td>генератор (httpx 0.28.1)</td><td>hw11-loadgen:v5</td><td>RAM 128Mi</td></tr>
+</table>
+
+<h2 id="model">Имитатор и формула метрик</h2>
+<p><code>backend_mode=simulated</code> во всех ответах и метриках. Управляемые параметры
+(ConfigMap, значения чарта): прогрев <code>WARMUP_SECONDS</code>, ограничение
+одновременной обработки <code>MAX_CONCURRENCY=1</code> с очередью <code>QUEUE_LIMIT=64</code>,
+выдача ответа частями <code>CHUNK_COUNT=8</code> × <code>CHUNK_DELAY=50мс</code> (пер-запрос
+<code>chunk_delay</code> ≤ 2 с — для «длительных» потоковых ответов), имитация локального
+префиксного кеша <code>CACHE_CAPACITY=64</code> с ценой hit 0,10 с / miss 0,40 с,
+вычислительная фаза <code>CPU_BURN_SECONDS=0.25</code> (busy-loop — причина
+масштабирования наблюдаема в CPU). Одни и те же параметры во всех сравниваемых
+прогонах. Все числа ниже относятся к модели нагрузки имитатора.</p>
+<p>Времена — монотонные часы клиента. <b>TTFC</b> — от отправки до первой части
+ответа (имитатор); <b>inter-chunk</b> = (full − ttfc)/(chunks − 1), средний интервал
+между частями (при 8 частях и 50 мс задержке ≈ 50 мс — сходится с конфигом);
+<b>full</b> — до финального события. Названия TTFT/TPOT оставлены для измерений
+реальной модели (TPOT = (full − TTFT)/(N − 1); при N = 1 TPOT отсутствует) —
+реальная модель в K8s не разворачивалась из-за RAM-лимита хоста (2,4 ГБ весов
+при ~2,5 ГБ доступных), основная часть по заданию выполнена на имитаторе.</p>
+<p>По каждому запросу сохраняются: planned/sent время, первый фрагмент, завершение,
+статус, Pod, версия (model_id + artifact_sha256), число частей
+(<code>results/raw/expX-*.jsonl</code>). Счётчики: planned / sent / completed /
+rejected / interrupted / expired — в SUMMARY каждого клиента и в итоговых таблицах
+разделов. Различие planned и sent показывает замедление самого генератора
+(медиана 0,004–0,005 с, максимум ~5 с при очереди старта — данные в логах).</p>
+<p>Prometheus: длительности в Histogram с границами
+<code>(.05 .1 .2 .3 .5 .8 1 1.5 2 3 5 8 12 20 40)</code>. Классический расчёт
+перцентиля из bucket-счётчиков (le сохранён):</p>
+<pre>histogram_quantile(0.95, sum by (le) (rate(sim_ttfc_seconds_bucket[1m])))</pre>
+<p>Сверка с клиентским журналом за тот же период — в разделе «Метрики и HPA».</p>
+
+<h2 id="expa">1. Опыт A. Прогрев, обновление и откат</h2>
+<h3>Гипотеза и исходный дефект</h3>
+<p>Дефект: startup/readiness считают запуск HTTP-процесса достаточным.
+Включается <code>warm.readyBeforeWarmup=true</code> (READY_BEFORE_WARMUP=1): сервис
+отдаёт 200 на /readyz до завершения прогрева. Прогрев 20 с, нагрузка 2 rps
+подана сразу после rollout.</p>
+<p><b>Данные до изменения.</b> Готовность: Ready-поды новой версии появляются в
+EndpointSlice с первых секунд — рисунок (трейс каждые 2 с):</p>
+<img src="results/figures/fig-A-warmup.png" alt="Ready по времени">
+<p>Подтверждение получения запросов непрогретым backend — по журналам реплик:
+запросы REQ_DONE раньше собственного WARMUP_DONE реплики
+(<code>logs/exp-A.log</code>, раздел «журнальное доказательство»):
+<b>4 из 4</b> ранних запросов обслужены репликами без завершённого прогрева
+(клиент при этом получает успешный HTTP-ответ — дефект незаметен снаружи,
+что и делает его опасным).</p>
+<p><b>Причина:</b> readiness-проба указывает на /healthz-класс ответа «процесс жив»,
+а не «вычисления готовы»; в сервисе готовность отдаётся в startup-хук до
+прогрева.</p>
+<p><b>Исправление:</b> /readyz отвечает 200 только после загрузки артефакта
+(сверка sha256) и завершения прогрева; readiness-проба смотрит /readyz.
+Повтор того же опыта: Ready-поды новой версии появляются в Slice только
+после ~20 с,rejected 0, TTFC p50 0,402 с против 0,783 с (и раскачивания
+очереди) в дефектной фазе. Zero-downtime сохраняется: старые поды живут до
+готовности новых (maxUnavailable=0).</p>
+<h3>Rollout A→B под нагрузкой</h3>
+<p>Нагрузка 1,5 rps потоком, каждый 15-й запрос — «длительный»
+(<code>chunk_delay=2</code>, полный ответ ~17 с); в момент активных стримов — rolling
+update v1→v2 (артефакт B), grace period 30 с (uvicorn graceful 25 с).
+Результат: <b>135 запросов: 134 completed, 0 rejected, 0 interrupted</b>, 1 expired —
+клиентский таймаут 30 с у стрима, стоявшего в очереди (поток сервером
+завершён, клиент не дождался; повторы не включались). Версии v1 и v2 видны
+в ответах окна обновления (таблица в логе). Линия Ready/Endpoints — снапшоты
+каждые 10 с в <code>logs/exp-A.log</code>, roll images +10…+120 с.</p>
+<h3>Неготовая B и откат</h3>
+<p>Публикация «заведомо неготовой B»: артефакт <code>sim-bad-artifact</code> с несовпадающим
+хешем — load_error, /readyz 503 постоянно, Pod вне EndpointSlice (снапшот в логе:
+NotReady-поды не получают адресов). Управляемый откат
+(<code>helm rollback</code>) к A; версия подтверждена фактическими ответами:
+<b>версии в ответах: {sim-cpu-v1}</b> — только A.</p>
+<h3>Принудительное завершение</h3>
+<p><code>kubectl delete pod --force --grace-period=0</code> на реплику клиента во время
+стримов. Результат: TCP-сессия умерла без FIN — активный стрим у клиента
+истёк по таймауту (1 expired из 60), новые запросы немедленно пошли на
+выжившую реплику (Endpoints обновились в пределах секунды — снапшот),
+ReplicaSet поднял замену, обслуживание восстановлено. Оборванный запрос
+зафиксирован клиентом как expired (не interrupted — сервер не успел ничего
+посчитать: kill до старта обработки). Повторы клиента учитывались бы отдельными
+попытками — в опыте выключены.</p>
+
+<h2 id="expb">2. Опыт B. Привязка к Pod и горячая реплика</h2>
+<p>Два Service над теми же двумя репликами: обычный и
+<code>sessionAffinity: ClientIP</code> (timeout 10800 с). Клиенты — 4 Pod с разными
+IP (10.244.0.x), одинаковые списки запросов, длины входов и расписание.
+HTTP keep-alive фиксируется: соединение одного клиента привязывается к одному
+Pod (DNAT на SYN) — это и есть «неявная привязка» без sessionAffinity.</p>
+<!--EXPB_DATA-->
+<h2 id="expc">3. Опыт C. HPA и мониторинг</h2>
+<!--EXPC_DATA-->
+<h2 id="checks">4. Собственные проверки</h2>
+<!--CHECKS_DATA-->
+<h2 id="limits">5. Ограничения</h2>
+<!--LIMITS_DATA-->
+<h2 id="defense">6. Ревью на защиту</h2>
+<p>Полный текст — <a href="docs/defense-review.md">docs/defense-review.md</a>.
+Вывод: «навсегда» отклоняется (3,1 с у A против 1,2 с у B при данных числах);
+привязка — оптимизация, а не условие допуска; история диалога — вне Pod;
+начатый потоковый ответ не переносится (grace — завершить, kill — клиентская
+повторная попытка с тем же request_id). Связь с кейсом лекции —
+<a href="docs/defense-review.md">см. раздел «Связь с кейсом»</a>.</p>
+
+<h2 id="appendix-stand">Приложение: запуск и удаление стенда</h2>
+<p><code>STAND_UP.md</code> — полная инструкция (kind create, docker build×2,
+helm-релизы monitoring/grafana/ksm/hw11, порт-форварды). Удаление:</p>
+<pre>helm uninstall hw11 grafana ksm monitoring -n monitoring
+kubectl delete ns monitoring
+kind delete cluster --name hw11
+docker rmi hw11-service:v4 hw11-loadgen:v5 …</pre>
+<p>Фактический размер стенда: узел kind ~1,6 ГиБ + образы ~0,5 ГиБ + PV
+Prometheus &lt;0,2 ГиБ — суммарно &lt;2,5 ГиБ на диске; RAM кластера ~1 ГиБ,
+мониторинг ≤0,9 ГиБ, сервис ≤0,5 ГиБ (лимиты в таблице выше). Срок хранения
+метрик Prometheus — 6 часов.</p>
+
+</main></body></html>
