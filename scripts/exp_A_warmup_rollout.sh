@@ -34,9 +34,9 @@ snapshot() {  # <метка>: Ready + EndpointSlice + версии
 
 start_clients() {  # $1: LG_ARGS — один клиент-под (с хоста управляем моментом)
   kubectl delete pod loadgen-pod --force --grace-period=0 >/dev/null 2>&1
-  kubectl run loadgen-pod --image=hw11-loadgen:v4 --restart=Never \
+  kubectl run loadgen-pod --image=hw11-loadgen:v5 --restart=Never \
     -l job-name=loadgen-single \
-    --overrides='{"spec":{"containers":[{"name":"loadgen","image":"hw11-loadgen:v4","imagePullPolicy":"IfNotPresent","env":[{"name":"LG_ARGS","value":"'"$1"'"},{"name":"PYTHONUNBUFFERED","value":"1"}],"resources":{"limits":{"memory":"128Mi"}}}],"restartPolicy":"Never"}}' \
+    --overrides='{"spec":{"containers":[{"name":"loadgen","image":"hw11-loadgen:v5","imagePullPolicy":"IfNotPresent","env":[{"name":"LG_ARGS","value":"'"$1"'"},{"name":"PYTHONUNBUFFERED","value":"1"}],"resources":{"limits":{"memory":"128Mi"}}}],"restartPolicy":"Never"}}' \
     >>"$LOG" 2>&1
 }
 
@@ -110,9 +110,9 @@ say "EndpointSlice обязан содержать только A; провер�
 start_clients "--url http://hw11-service:8000 --rps 0.5 --duration 10 --stream --sessions 4"
 collect_client "$RAW/expA4-badB.jsonl" 90
 python3 scripts/summarize.py "$RAW/expA4-badB.jsonl" | tee -a "$LOG"
-say "управляемый откат к A (helm rollback к ревизии v1)"
+say "управляемый откат к A (helm rollback к предыдущей ревизии с артефактом v1)"
 helm history hw11 | tail -5 >>"$LOG" 2>&1
-helm rollback hw11 2 >>"$LOG" 2>&1 || helm upgrade hw11 chart --set image.tag=v4 \
+helm rollback hw11 >>"$LOG" 2>&1 || helm upgrade hw11 chart --set image.tag=v4 \
   --set warm.seconds=5 --set warm.readyBeforeWarmup=false \
   --set limits.cpuBurnSeconds=0.25 --set modelVersion=sim-cpu-v1 >>"$LOG" 2>&1
 wait_rollout

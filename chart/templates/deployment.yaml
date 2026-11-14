@@ -25,6 +25,11 @@ spec:
         app: hw11-service
         model-version: {{ .Values.modelVersion }}
       annotations:
+        # Пересоздание Pod при смене настроек имитатора или версии артефакта:
+        # без checksum helm обновит только ConfigMap, работающие поды
+        # останутся со старым env — «дефектный» опыт A не воспроизведётся.
+        checksum/settings: {{ include (print $.Template.BasePath "/configmap-settings.yaml") . | sha256sum }}
+        checksum/model: {{ include (print $.Template.BasePath "/configmap-model.yaml") . | sha256sum }}
         prometheus.io/scrape: {{ .Values.metrics.scrape | quote }}
         prometheus.io/path: {{ .Values.metrics.path | quote }}
         prometheus.io/port: {{ .Values.metrics.port | quote }}

@@ -96,6 +96,11 @@ async def one_request(client: httpx.AsyncClient, url: str, args,
                         first_at = time.monotonic()
                         rec["ttfc_seconds"] = round(first_at - sent_at, 4)
                         rec["first_chunk"] = chunk[:120]
+                    if "event: error" in chunk:
+                        # Сервер открыл стрим и отказал (непрогрет/перегружен):
+                        # HTTP 200, но ответа нет — учитываем как rejected.
+                        rec["outcome"] = "rejected"
+                        rec["stream_error"] = chunk[:120]
                     if '"request_id"' in chunk:
                         rec["chunks_seen"] += 1
                     if "event: done" in chunk:

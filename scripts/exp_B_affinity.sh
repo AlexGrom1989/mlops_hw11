@@ -36,7 +36,7 @@ run_combo() {  # <тег> <svc> <extra>
         rates="--rps 0.25"
       fi
       kubectl delete pod "loadgen-$i" --force --grace-period=0 >>"$LOG" 2>&1 || true
-      kubectl run "loadgen-$i" --image=hw11-loadgen:v4 --restart=Never \
+      kubectl run "loadgen-$i" --image=hw11-loadgen:v5 --restart=Never \
         --env="LG_ARGS=$base --client-id c$i $rates" \
         --env="PYTHONUNBUFFERED=1" >>"$LOG" 2>&1
     done

@@ -18,7 +18,7 @@ mkdir -p logs "$RAW"
 start_clients() {  # $1 rps, $2 duration, $3 svc
   for i in 0 1 2 3; do
     kubectl delete pod "loadgen-$i" --force --grace-period=0 >>"$LOG" 2>&1 || true
-    kubectl run "loadgen-$i" --image=hw11-loadgen:v4 --restart=Never \
+    kubectl run "loadgen-$i" --image=hw11-loadgen:v5 --restart=Never \
       --env="LG_ARGS=--url http://$3:8000 --client-id c$i --rps $1 --duration $2 --stream --sessions 8 --no-keepalive" \
       --env="PYTHONUNBUFFERED=1" >>"$LOG" 2>&1
   done
