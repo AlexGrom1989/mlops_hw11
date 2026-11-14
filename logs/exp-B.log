@@ -51,3 +51,32 @@ pod/loadgen-2 created
 Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
 Error from server (NotFound): pods "loadgen-3" not found
 pod/loadgen-3 created
+pod/loadgen-0 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-0" force deleted
+pod/loadgen-1 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-1" force deleted
+pod/loadgen-2 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-2" force deleted
+pod/loadgen-3 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-3" force deleted
+[B B1-uniform-plain run2] успешных 120 из 120
+  pod 568f69b579-snx5f: 90 (75%), TTFC p50/p95 1.00/1.66 с, queue p50/p95 0.60/1.26 с, cache hit 0/90, клиенты ['c0', 'c2', 'c3']
+  pod 568f69b579-gdcfz: 30 (25%), TTFC p50/p95 0.40/0.40 с, queue p50/p95 0.00/0.00 с, cache hit 0/30, клиенты ['c1']
+  перекос: max доля реплики 75% (равномерно = 50%)
+[B] B1-uniform-plain прогон 3/3 17:08:44
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-0" not found
+pod/loadgen-0 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-1" not found
+pod/loadgen-1 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-2" not found
+pod/loadgen-2 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-3" not found
+pod/loadgen-3 created
