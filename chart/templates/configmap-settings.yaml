@@ -16,3 +16,4 @@ data:
   CACHE_CAPACITY: {{ .Values.limits.cache.capacity | quote }}
   CACHE_HIT_COST: {{ .Values.limits.cache.hitCost | quote }}
   CACHE_MISS_COST: {{ .Values.limits.cache.missCost | quote }}
+  CPU_BURN_SECONDS: {{ .Values.limits.cpuBurnSeconds | default "0" | quote }}

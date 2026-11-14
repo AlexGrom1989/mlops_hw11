@@ -53,6 +53,9 @@ CHUNK_DELAY = float(os.environ.get("CHUNK_DELAY", "0.05"))    # межчасте
 CACHE_CAPACITY = int(os.environ.get("CACHE_CAPACITY", "64"))  # записей префиксов
 CACHE_HIT_COST = float(os.environ.get("CACHE_HIT_COST", "0.10"))   # с
 CACHE_MISS_COST = float(os.environ.get("CACHE_MISS_COST", "0.40"))  # с
+# Вычислительная фаза имитатора для опыта C (HPA по CPU): busy-loop в
+# отдельном потоке CPU_BURN_SECONDS на запрос. 0 — выключено.
+CPU_BURN_SECONDS = float(os.environ.get("CPU_BURN_SECONDS", "0"))
 
 # ------------------------------------------------------------------ метрики
 # Меток немного: pod и mode. Запрос/сессия — только в журнале.
@@ -223,6 +226,14 @@ async def _serve(payload: dict, mode: str):
                 prefix_hit = STATE.cache_lookup(prefix)
                 # Стоимость кеша имитатора: hit дешевле miss (см. values).
                 await asyncio.sleep(CACHE_HIT_COST if prefix_hit else CACHE_MISS_COST)
+                if CPU_BURN_SECONDS > 0:
+                    # Вычислительная нагрузка (опыт C): причина масштабирования
+                    # наблюдаема в CPU-метрике контейнера.
+                    def _busy() -> None:
+                        end = time.perf_counter() + CPU_BURN_SECONDS
+                        while time.perf_counter() < end:
+                            pass
+                    await asyncio.to_thread(_busy)
                 first_at = None
                 for i in range(max_chunks):
                     await asyncio.sleep(CHUNK_DELAY)
