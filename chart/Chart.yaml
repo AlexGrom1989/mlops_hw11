@@ -1,0 +1,6 @@
+apiVersion: v2
+name: hw11-service
+description: Сервис ДЗ 8+9+10 в Kubernetes (backend_mode=simulated)
+type: application
+version: 0.1.0
+appVersion: "v1"

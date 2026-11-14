@@ -1,0 +1,13 @@
+{{- $ver := .Values.modelVersion }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: model-artifact-{{ $ver }}
+  labels:
+    app: hw11-service
+    model-version: {{ $ver }}
+binaryData:
+  artifact.bin: {{ .Files.Get (printf "model/%s/artifact.bin" $ver) | b64enc }}
+data:
+  artifact.sha256: {{ .Files.Get (printf "model/%s/artifact.sha256" $ver) | quote }}
+  manifest.json: {{ .Files.Get (printf "model/%s/manifest.json" $ver) | quote }}

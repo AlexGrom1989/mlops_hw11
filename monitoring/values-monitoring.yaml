@@ -1,0 +1,63 @@
+# Мониторинг стенда ДЗ 11: голые Prometheus и Grafana (без оператора —
+# экономия памяти на 14,8 ГБ машине). Правила алертов — rule file.
+serverFiles:
+  rules:
+    groups:
+    - name: hw11-service
+      rules:
+      # p95 времени до первой части ответа выше 5 с при живом трафике.
+      - alert: HW11TTFCSlowP95
+        expr: |
+          histogram_quantile(0.95,
+            sum by (le) (rate(sim_ttfc_seconds_bucket[1m]))) > 5
+          and
+          sum(rate(sim_ttfc_seconds_count[1m])) > 10
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: "p95 TTFC выше 5 с"
+          description: "Очередь или деградация backend: p95 держится выше
+            порога 30 с подряд при более чем 10 наблюдениях в минуту."
+      # Доля отклонённых/оборванных запросов выше 5%.
+      - alert: HW11ErrorRateHigh
+        expr: |
+          sum(rate(sim_requests_total{outcome=~"rejected|interrupted"}[1m]))
+          /
+          sum(rate(sim_requests_total[1m])) > 0.05
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Доля отказов/оборванных выше 5%"
+          description: "rejected+interrupted превышают 5% исходов 30 с подряд."
+
+server:
+  # Память стенда ограничена: короткий retention, час данных достаточно
+  # для опытов и дашборда (в REPORT указан объём и границы).
+  retention: 6h
+  # Опыты короткие: скрейп и оценки алертов чаще дефолта.
+  global:
+    scrape_interval: 15s
+    evaluation_interval: 15s
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+
+# Discovery подов по аннотациям prometheus.io/* включён в самом чарте:
+# встроенная джоба kubernetes-pods читает prometheus.io/scrape|path|port
+# (встроенный конфиг: helm get values / prometheus.yml). Свою копию
+# не добавляем — дубль имени джобы роняет загрузку конфига.
+extraScrapeConfigs: ""
+
+alertmanager:
+  enabled: false
+pushgateway:
+  enabled: false
+kubeStateMetrics:
+  enabled: false
+nodeExporter:
+  enabled: false

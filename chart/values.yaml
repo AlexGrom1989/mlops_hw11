@@ -1,0 +1,93 @@
+# Значения по умолчанию: две реплики, заметный прогрев, симулятор.
+# Все параметры имитатора и probes — здесь, чтобы опыты воспроизводились
+# одной командой helm upgrade --set.
+
+image:
+  repository: hw11-service
+  tag: v1
+  pullPolicy: IfNotPresent
+
+# Версия артефакта-имитатора: ConfigMap собирается из model-sim/<версии>/.
+# Восстановление версии после замены Pod: хеш и manifest одни и те же байты.
+modelVersion: sim-cpu-v1
+
+replicaCount: 2
+
+service:
+  type: ClusterIP
+  port: 8000
+  # Отдельный Service с привязкой по IP клиента (опыт B).
+  affinity:
+    enabled: true
+    sessionAffinity: ClientIP
+    timeoutSeconds: 10800
+
+warm:
+  seconds: 20                    # заметный прогрев (опыт A)
+  # ДЕФЕКТ опыта A: true = HTTP готов и readiness отдаёт 200 до прогрева.
+  readyBeforeWarmup: false
+
+limits:
+  maxConcurrency: 1              # одновременных вычислений на реплику
+  queueLimit: 64
+  maxPromptChars: 4000
+  maxMessages: 40
+  chunkCount: 8
+  chunkDelay: "0.05"
+  cache:
+    capacity: 64                 # записей префиксов на реплику
+    hitCost: "0.10"              # с — имитация локального кеша
+    missCost: "0.40"             # с
+
+resources:
+  requests:
+    cpu: 300m                    # нужен HPA по CPU (обязателен request)
+    memory: 128Mi
+  limits:
+    cpu: "1"
+    memory: 256Mi
+
+probes:
+  # Startup: процесс поднимается (HTTP слушает) — до минуты.
+  startup:
+    periodSeconds: 2
+    failureThreshold: 30
+  # Readiness: артефакт загружен И прогрев завершён.
+  readiness:
+    periodSeconds: 2
+    timeoutSeconds: 2
+    failureThreshold: 1
+  # Liveness: только «процесс жив», прогрев не роняет Pod.
+  liveness:
+    periodSeconds: 5
+    timeoutSeconds: 2
+    failureThreshold: 3
+
+# Grace period: активные потоковые ответы старой версии успевают завершиться
+# при rolling update (uvicorn timeout-graceful-shutdown=25).
+terminationGracePeriodSeconds: 30
+
+rollingUpdate:
+  maxUnavailable: 0              # ёмкость не падает ниже двух
+  maxSurge: 1
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 60
+  # Окно стабилизации при уменьшении (behavior.scaleDown).
+  stabilizationWindowSeconds: 120
+
+metrics:
+  # Аннотации discovery для Prometheus (job kubernetes-pods).
+  scrape: "true"
+  path: /metrics
+  port: "8000"
+
+# Два алерта ДЗ 4 раздела (задержка и доля отказов); правила Prometheus.
+alerts:
+  ttfcThresholdSeconds: 5        # p95 времени до первой части
+  errorRateThreshold: "0.05"     # доля отклонённых/оборванных
+  forSeconds: "30s"
+  minObservations: 10            # минимальный объём наблюдений за период

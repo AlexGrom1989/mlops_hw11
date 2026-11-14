@@ -1,0 +1,40 @@
+# Обычный Service: балансировка по соединениям, без привязки клиента.
+apiVersion: v1
+kind: Service
+metadata:
+  name: hw11-service
+  labels:
+    app: hw11-service
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    app: hw11-service
+  ports:
+  - name: http
+    port: {{ .Values.service.port }}
+    targetPort: http
+
+{{- if .Values.service.affinity.enabled }}
+---
+# Service с привязкой клиента (опыт B): тот же селектор над теми же Pod.
+apiVersion: v1
+kind: Service
+metadata:
+  name: hw11-service-affinity
+  labels:
+    app: hw11-service
+spec:
+  type: {{ .Values.service.type }}
+  sessionAffinity: {{ .Values.service.affinity.sessionAffinity }}
+  {{- if eq .Values.service.affinity.sessionAffinity "ClientIP" }}
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: {{ .Values.service.affinity.timeoutSeconds }}
+  {{- end }}
+  selector:
+    app: hw11-service
+  ports:
+  - name: http
+    port: {{ .Values.service.port }}
+    targetPort: http
+{{- end }}

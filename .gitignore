@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+*.pyc
+.kind/
+logs-kind.log
+logs-docker-build.log
+results/raw/
+*.tgz

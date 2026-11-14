@@ -1,0 +1,7 @@
+{
+  "model_id": "sim-cpu-v2",
+  "artifact_sha256": "ad9b7edd13e3d40c21a93771b4767f7f352fd835d58fc07032ae38696745c5b1",
+  "backend_mode": "simulated",
+  "size_bytes": 32768,
+  "kind": "учебная фикстура-имитатор, не веса"
+}

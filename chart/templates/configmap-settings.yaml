@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-settings
+  labels:
+    app: hw11-service
+data:
+  WARMUP_SECONDS: {{ .Values.warm.seconds | quote }}
+  READY_BEFORE_WARMUP: {{ ternary "1" "0" .Values.warm.readyBeforeWarmup | quote }}
+  MAX_CONCURRENCY: {{ .Values.limits.maxConcurrency | quote }}
+  QUEUE_LIMIT: {{ .Values.limits.queueLimit | quote }}
+  MAX_PROMPT_CHARS: {{ .Values.limits.maxPromptChars | quote }}
+  MAX_MESSAGES: {{ .Values.limits.maxMessages | quote }}
+  CHUNK_COUNT: {{ .Values.limits.chunkCount | quote }}
+  CHUNK_DELAY: {{ .Values.limits.chunkDelay | quote }}
+  CACHE_CAPACITY: {{ .Values.limits.cache.capacity | quote }}
+  CACHE_HIT_COST: {{ .Values.limits.cache.hitCost | quote }}
+  CACHE_MISS_COST: {{ .Values.limits.cache.missCost | quote }}

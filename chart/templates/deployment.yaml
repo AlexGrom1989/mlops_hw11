@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hw11-service
+  labels:
+    app: hw11-service
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- else }}
+  # при HPA поле replicas управляется контроллером; на старте задаём минимум
+  replicas: {{ .Values.autoscaling.minReplicas }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: hw11-service
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: {{ .Values.rollingUpdate.maxUnavailable }}
+      maxSurge: {{ .Values.rollingUpdate.maxSurge }}
+  template:
+    metadata:
+      labels:
+        app: hw11-service
+        model-version: {{ .Values.modelVersion }}
+      annotations:
+        prometheus.io/scrape: {{ .Values.metrics.scrape | quote }}
+        prometheus.io/path: {{ .Values.metrics.path | quote }}
+        prometheus.io/port: {{ .Values.metrics.port | quote }}
+    spec:
+      terminationGracePeriodSeconds: {{ .Values.terminationGracePeriodSeconds }}
+      containers:
+      - name: service
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - name: http
+          containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: service-settings
+        volumeMounts:
+        - name: model
+          mountPath: /app/model
+          readOnly: true
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        # Startup: «HTTP-процесс поднялся». Ловит долгий старт контейнера,
+        # но НЕ заменяет readiness: готовность к трафику проверяет /readyz.
+        startupProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          periodSeconds: {{ .Values.probes.startup.periodSeconds }}
+          failureThreshold: {{ .Values.probes.startup.failureThreshold }}
+        # Readiness: артефакт+прогрев. Новая реплика не получает рабочий
+        # трафик, пока /readyz не ответит 200 (прогрев {{ .Values.warm.seconds }}s).
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: http
+          periodSeconds: {{ .Values.probes.readiness.periodSeconds }}
+          timeoutSeconds: {{ .Values.probes.readiness.timeoutSeconds }}
+          failureThreshold: {{ .Values.probes.readiness.failureThreshold }}
+        # Liveness: только факт жизни процесса; прогрев/артефакт не роняет
+        # Pod, иначе нечитаемо смешивать «медленно готовится» и «умер».
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: http
+          periodSeconds: {{ .Values.probes.liveness.periodSeconds }}
+          timeoutSeconds: {{ .Values.probes.liveness.timeoutSeconds }}
+          failureThreshold: {{ .Values.probes.liveness.failureThreshold }}
+      volumes:
+      - name: model
+        configMap:
+          name: model-artifact-{{ .Values.modelVersion }}
