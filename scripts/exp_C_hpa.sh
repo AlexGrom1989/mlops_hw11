@@ -63,7 +63,11 @@ T0=$(date +%s)
     sleep 10
   done ) &
 TRACE_PID=$!
-sleep 240
+# Клиенты идут 300 с: дожидаемся их завершения, собираем журналы и только
+# потом удаляем (урок первого прогона: force delete до collect → 4 пустых
+# JSONL при живом HPA-трейсе).
+sleep 310
+collect_clients "C1"
 say "снимаю нагрузку; возврат к минимуму наблюдаем отдельно"
 stop_clients
 # scaleDown stabilizationWindow=120s + периоды: ждём до 6 минут
@@ -74,7 +78,6 @@ for t in $(seq 0 35); do
   sleep 10
 done
 kill $TRACE_PID 2>/dev/null
-collect_clients "C1"
 say "C1 клиентские итоги:"
 for i in 0 1 2 3; do python3 scripts/summarize.py "$RAW/expC-C1-c$i.jsonl" >>"$LOG" 2>&1; done
 kubectl get hpa >>"$LOG" 2>&1

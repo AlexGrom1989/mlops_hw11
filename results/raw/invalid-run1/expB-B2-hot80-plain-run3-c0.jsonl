@@ -1,0 +1,6 @@
+usage: loadgen.py [-h] [--url URL] [--client-id CLIENT_ID] [--rps RPS]
+                  [--duration DURATION] [--sessions SESSIONS] [--hot HOT]
+                  [--stream] [--max-chunks MAX_CHUNKS]
+                  [--long-every LONG_EVERY] [--timeout-s TIMEOUT_S]
+                  [--warmup-s WARMUP_S] [--no-keepalive]
+loadgen.py: error: unrecognized arguments: --hot-clients

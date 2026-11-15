@@ -80,3 +80,362 @@ pod/loadgen-2 created
 Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
 Error from server (NotFound): pods "loadgen-3" not found
 pod/loadgen-3 created
+pod/loadgen-0 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-0" force deleted
+pod/loadgen-1 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-1" force deleted
+pod/loadgen-2 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-2" force deleted
+pod/loadgen-3 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-3" force deleted
+[B B1-uniform-plain run3] успешных 120 из 120
+  pod 568f69b579-snx5f: 90 (75%), TTFC p50/p95 1.05/1.73 с, queue p50/p95 0.65/1.33 с, cache hit 0/90, клиенты ['c1', 'c2', 'c3']
+  pod 568f69b579-gdcfz: 30 (25%), TTFC p50/p95 0.40/0.40 с, queue p50/p95 0.00/0.00 с, cache hit 0/30, клиенты ['c0']
+  перекос: max доля реплики 75% (равномерно = 50%)
+[B] B2-hot80-plain прогон 1/3 17:11:06
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-0" not found
+pod/loadgen-0 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-1" not found
+pod/loadgen-1 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-2" not found
+pod/loadgen-2 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-3" not found
+pod/loadgen-3 created
+error: timed out waiting for the condition on pods/loadgen-0
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-0" force deleted
+error: timed out waiting for the condition on pods/loadgen-1
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-1" force deleted
+error: timed out waiting for the condition on pods/loadgen-2
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-2" force deleted
+error: timed out waiting for the condition on pods/loadgen-3
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-3" force deleted
+[B B2-hot80-plain run1] успешных 0 из 0
+[B] B2-hot80-plain прогон 2/3 17:19:28
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-0" not found
+pod/loadgen-0 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-1" not found
+pod/loadgen-1 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-2" not found
+pod/loadgen-2 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-3" not found
+pod/loadgen-3 created
+error: timed out waiting for the condition on pods/loadgen-0
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-0" force deleted
+error: timed out waiting for the condition on pods/loadgen-1
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-1" force deleted
+error: timed out waiting for the condition on pods/loadgen-2
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-2" force deleted
+error: timed out waiting for the condition on pods/loadgen-3
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-3" force deleted
+[B B2-hot80-plain run2] успешных 0 из 0
+[B] B2-hot80-plain прогон 3/3 17:27:49
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-0" not found
+pod/loadgen-0 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-1" not found
+pod/loadgen-1 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-2" not found
+pod/loadgen-2 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-3" not found
+pod/loadgen-3 created
+error: timed out waiting for the condition on pods/loadgen-0
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-0" force deleted
+error: timed out waiting for the condition on pods/loadgen-1
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-1" force deleted
+error: timed out waiting for the condition on pods/loadgen-2
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-2" force deleted
+error: timed out waiting for the condition on pods/loadgen-3
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-3" force deleted
+[B B2-hot80-plain run3] успешных 0 из 0
+[B] B3-hot80-affinity прогон 1/3 17:36:10
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-0" not found
+pod/loadgen-0 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-1" not found
+pod/loadgen-1 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-2" not found
+pod/loadgen-2 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-3" not found
+pod/loadgen-3 created
+error: timed out waiting for the condition on pods/loadgen-0
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-0" force deleted
+error: timed out waiting for the condition on pods/loadgen-1
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-1" force deleted
+error: timed out waiting for the condition on pods/loadgen-2
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-2" force deleted
+error: timed out waiting for the condition on pods/loadgen-3
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-3" force deleted
+[B B3-hot80-affinity run1] успешных 0 из 0
+[B] B3-hot80-affinity прогон 2/3 17:44:32
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-0" not found
+pod/loadgen-0 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-1" not found
+pod/loadgen-1 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-2" not found
+pod/loadgen-2 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-3" not found
+pod/loadgen-3 created
+error: timed out waiting for the condition on pods/loadgen-0
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-0" force deleted
+error: timed out waiting for the condition on pods/loadgen-1
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-1" force deleted
+error: timed out waiting for the condition on pods/loadgen-2
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-2" force deleted
+error: timed out waiting for the condition on pods/loadgen-3
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-3" force deleted
+[B B3-hot80-affinity run2] успешных 0 из 0
+[B] B3-hot80-affinity прогон 3/3 17:52:53
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-0" not found
+pod/loadgen-0 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-1" not found
+pod/loadgen-1 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-2" not found
+pod/loadgen-2 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-3" not found
+pod/loadgen-3 created
+error: timed out waiting for the condition on pods/loadgen-0
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-0" force deleted
+error: timed out waiting for the condition on pods/loadgen-1
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-1" force deleted
+error: timed out waiting for the condition on pods/loadgen-2
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-2" force deleted
+error: timed out waiting for the condition on pods/loadgen-3
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-3" force deleted
+[B B3-hot80-affinity run3] успешных 0 из 0
+[B] B4-hot80-noka прогон 1/3 18:01:14
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-0" not found
+pod/loadgen-0 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-1" not found
+pod/loadgen-1 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-2" not found
+pod/loadgen-2 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-3" not found
+pod/loadgen-3 created
+error: timed out waiting for the condition on pods/loadgen-0
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-0" force deleted
+error: timed out waiting for the condition on pods/loadgen-1
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-1" force deleted
+error: timed out waiting for the condition on pods/loadgen-2
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-2" force deleted
+error: timed out waiting for the condition on pods/loadgen-3
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-3" force deleted
+[B B4-hot80-noka run1] успешных 0 из 0
+[B] B4-hot80-noka прогон 2/3 18:09:35
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-0" not found
+pod/loadgen-0 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-1" not found
+pod/loadgen-1 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-2" not found
+pod/loadgen-2 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-3" not found
+pod/loadgen-3 created
+error: timed out waiting for the condition on pods/loadgen-0
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-0" force deleted
+error: timed out waiting for the condition on pods/loadgen-1
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-1" force deleted
+error: timed out waiting for the condition on pods/loadgen-2
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-2" force deleted
+error: timed out waiting for the condition on pods/loadgen-3
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-3" force deleted
+[B B4-hot80-noka run2] успешных 0 из 0
+[B] B4-hot80-noka прогон 3/3 18:17:57
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-0" not found
+pod/loadgen-0 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-1" not found
+pod/loadgen-1 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-2" not found
+pod/loadgen-2 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-3" not found
+pod/loadgen-3 created
+error: timed out waiting for the condition on pods/loadgen-0
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-0" force deleted
+error: timed out waiting for the condition on pods/loadgen-1
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-1" force deleted
+error: timed out waiting for the condition on pods/loadgen-2
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-2" force deleted
+error: timed out waiting for the condition on pods/loadgen-3
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-3" force deleted
+[B B4-hot80-noka run3] успешных 0 из 0
+[B] B5-uniform-affinity прогон 1/3 18:26:18
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-0" not found
+pod/loadgen-0 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-1" not found
+pod/loadgen-1 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-2" not found
+pod/loadgen-2 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-3" not found
+pod/loadgen-3 created
+pod/loadgen-0 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-0" force deleted
+pod/loadgen-1 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-1" force deleted
+pod/loadgen-2 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-2" force deleted
+pod/loadgen-3 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-3" force deleted
+[B B5-uniform-affinity run1] успешных 120 из 120
+  pod 568f69b579-gdcfz: 60 (50%), TTFC p50/p95 0.87/0.88 с, queue p50/p95 0.48/0.48 с, cache hit 0/60, клиенты ['c0', 'c3']
+  pod 568f69b579-snx5f: 60 (50%), TTFC p50/p95 1.00/1.01 с, queue p50/p95 0.60/0.61 с, cache hit 0/60, клиенты ['c1', 'c2']
+  перекос: max доля реплики 50% (равномерно = 50%)
+[B] B5-uniform-affinity прогон 2/3 18:28:40
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-0" not found
+pod/loadgen-0 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-1" not found
+pod/loadgen-1 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-2" not found
+pod/loadgen-2 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-3" not found
+pod/loadgen-3 created
+pod/loadgen-0 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-0" force deleted
+pod/loadgen-1 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-1" force deleted
+pod/loadgen-2 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-2" force deleted
+pod/loadgen-3 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-3" force deleted
+[B B5-uniform-affinity run2] успешных 120 из 120
+  pod 568f69b579-snx5f: 90 (75%), TTFC p50/p95 1.06/1.70 с, queue p50/p95 0.66/1.30 с, cache hit 0/90, клиенты ['c1', 'c2', 'c3']
+  pod 568f69b579-gdcfz: 30 (25%), TTFC p50/p95 0.40/0.40 с, queue p50/p95 0.00/0.00 с, cache hit 0/30, клиенты ['c0']
+  перекос: max доля реплики 75% (равномерно = 50%)
+[B] B5-uniform-affinity прогон 3/3 18:31:01
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-0" not found
+pod/loadgen-0 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-1" not found
+pod/loadgen-1 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-2" not found
+pod/loadgen-2 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-3" not found
+pod/loadgen-3 created
+pod/loadgen-0 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-0" force deleted
+pod/loadgen-1 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-1" force deleted
+pod/loadgen-2 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-2" force deleted
+pod/loadgen-3 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-3" force deleted
+[B B5-uniform-affinity run3] успешных 120 из 120
+  pod 568f69b579-gdcfz: 120 (100%), TTFC p50/p95 1.76/2.43 с, queue p50/p95 1.36/2.03 с, cache hit 0/120, клиенты ['c0', 'c1', 'c2', 'c3']
+  перекос: max доля реплики 100% (равномерно = 50%)
+[B] опыт B завершён
+Release "hw11" has been upgraded. Happy Helming!
+NAME: hw11
+LAST DEPLOYED: Sun Nov 15 15:32:52 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 37
+TEST SUITE: None
+deployment "hw11-service" successfully rolled out
+[B] подготовка: стабильные 2 реплики
+[B] B2-hot80-plain прогон 1/3 15:32:53
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-0" not found
+pod/loadgen-0 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-1" not found
+pod/loadgen-1 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-2" not found
+pod/loadgen-2 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-3" not found
+pod/loadgen-3 created

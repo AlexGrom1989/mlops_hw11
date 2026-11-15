@@ -24,6 +24,7 @@ kubectl rollout status deploy/hw11-service --timeout=120s >>"$LOG" 2>&1
 run_combo() {  # <тег> <svc> <extra>
   local tag=$1 svc=$2 extra=$3
   local base="--url http://$svc:8000 --duration 120 --stream --sessions 8 $extra"
+  base=${base/--hot-clients/}   # маркер hot-сценария не уходит в loadgen
   local hot_args="--rps 1.0 --hot 100"
   local rest_args="--rps 0.083"
   for r in 1 2 3; do
@@ -52,9 +53,10 @@ run_combo() {  # <тег> <svc> <extra>
 }
 
 echo "[B] подготовка: стабильные 2 реплики" >>"$LOG"
-run_combo "B1-uniform-plain"    hw11-service         ""
+# B1/B5 уже валидны (равномерные прогоны); повторяем только hot-комбинации,
+# у которых первый запуск передал loadgen-у маркер --hot-clients (аргумент-
+# ошибка, 0 записей).
 run_combo "B2-hot80-plain"      hw11-service         "--hot-clients"
 run_combo "B3-hot80-affinity"   hw11-service-affinity "--hot-clients"
 run_combo "B4-hot80-noka"       hw11-service         "--hot-clients --no-keepalive"
-run_combo "B5-uniform-affinity" hw11-service-affinity ""
 echo "[B] опыт B завершён" >>"$LOG"
