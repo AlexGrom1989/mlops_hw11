@@ -31,28 +31,50 @@ def sh(cmd: str, timeout: int = 300) -> str:
     return (r.stdout + r.stderr).strip()
 
 
-async def wait_endpoints_ready(client, want: int, timeout_s: int) -> float | None:
-    """Ждём want готовых адресов в EndpointSlice; возвращаем время ожидания."""
+def current_rs() -> str:
+    return sh("kubectl get pods -l app=hw11-service "
+              "-o jsonpath='{.items[0].metadata.name}'").strip("'").rsplit("-", 2)[0]
+
+
+async def new_rs_ready(old_rs: str, timeout_s: int) -> float | None:
+    """Ждём первый Ready-под НОВОГО RS; возвращаем секунды ожидания."""
     t0 = time.monotonic()
     while time.monotonic() - t0 < timeout_s:
-        out = sh("kubectl get endpointslice -l kubernetes.io/service-name="
-                 "hw11-service -o json")
+        out = sh("kubectl get pods -l app=hw11-service -o json")
         try:
             d = json.loads(out)
-            ready = sum(1 for s in d["items"] for e in s.get("endpoints", [])
-                        if e.get("conditions", {}).get("ready") is True)
+            for p in d["items"]:
+                if p["metadata"]["name"].rsplit("-", 2)[0] != old_rs:
+                    if any(c.get("ready") for c in
+                           p["status"].get("containerStatuses", [])):
+                        return time.monotonic() - t0
         except ValueError:
-            ready = 0
-        if ready >= want:
-            return time.monotonic() - t0
+            pass
         await asyncio.sleep(1)
     return None
 
 
-async def helm_set(**kv) -> None:
+async def helm_set(wait: bool = True, **kv) -> None:
     args = " ".join(f"--set {k}={v}" for k, v in kv.items())
-    sh(f"helm upgrade hw11 chart {args} --wait --timeout 90s")
-    sh("kubectl rollout status deploy/hw11-service --timeout=120s")
+    w = "--wait " if wait else ""
+    sh(f"helm upgrade hw11 chart {args} {w}--timeout 90s")
+    if wait:
+        sh("kubectl rollout status deploy/hw11-service --timeout=120s")
+
+
+async def wait_model(client, model_id: str, timeout_s: int = 90) -> bool:
+    """Опрос фактической версии до появления ожидаемой в ответах."""
+    t0 = time.monotonic()
+    while time.monotonic() - t0 < timeout_s:
+        try:
+            r = await do(client, "POST", "/generate",
+                         json={"prompt": "опрос версии", "max_chunks": 1})
+            if r.status_code == 200 and r.json().get("model_id") == model_id:
+                return True
+        except (httpx.HTTPError, ValueError):
+            pass
+        await asyncio.sleep(2)
+    return False
 
 
 def _kubectl_env() -> dict:
@@ -131,47 +153,51 @@ async def do(client, method: str, path: str, retries: int = 3, **kw):
 # ------------------------------------------------------------------ проверки
 
 async def check_warmup() -> bool:
-    """RED: с дефектом запросы уходят непрогретой реплике.
-    GREEN: без дефекта EndpointSlice пуст до конца прогрева, 503 нет."""
+    """RED: при дефекте новая реплика Ready немедленно (до прогрева 12 с) и
+    запрос обслужен в окне прогрева (журнал). GREEN: без дефекта новая
+    реплика Ready только после прогрева — EndpointSlice не получает её
+    раньше WARMUP_DONE."""
     ok = True
     async with httpx.AsyncClient(trust_env=False, timeout=30) as c:
         await forward(c)
-        # --- дефектный режим
-        await helm_set(image_tag="v4", **{"warm.seconds": 12,
-                                          "warm.readyBeforeWarmup": "true"})
-        t_defect = await wait_endpoints_ready(c, 1, 60)
+        # --- дефектный режим: helm без --wait, наблюдаем мгновенный Ready
+        old_rs = current_rs()
+        await helm_set(wait=False, image_tag="v4",
+                       **{"warm.seconds": 12, "warm.readyBeforeWarmup": "true"})
+        t_defect = await new_rs_ready(old_rs, 60)
         r = await do(c, "POST", "/generate", json={"prompt": "дефект-проверка"})
-        body = r.json()
-        defect_served = r.status_code == 200
-        print(f"  RED дефект: endpoints через {t_defect:.1f} c, ответ "
-              f"status={r.status_code} warm={body.get('warm')} — трафик ушёл "
-              f"{'непрогретой' if defect_served and not body.get('warm') else '?'} реплике")
-        ok = ok and defect_served and not body.get("warm")
-        # --- исправление
-        await helm_set(image_tag="v4", **{"warm.seconds": 12,
-                                          "warm.readyBeforeWarmup": "false"})
-        r = await do(c, "GET", "/readyz")
-        t_ready = await wait_endpoints_ready(c, 2, 60)
-        seen_503 = r.status_code == 503
-        # теперь два запроса — оба от прогретой реплики
+        warm_before_warm_done = t_defect is not None and t_defect < 10
+        print(f"  RED дефект: новая реплика Ready через {t_defect} c "
+              f"(прогрев 12 c), запрос при прогреве status={r.status_code} "
+              f"— {'дефект подтверждён' if warm_before_warm_done else '?'}")
+        ok = ok and r.status_code == 200 and warm_before_warm_done
+        # --- исправление: тоже без --wait, следим за появлением Ready
+        old_rs = current_rs()
+        await helm_set(wait=False, image_tag="v4",
+                       **{"warm.seconds": 12, "warm.readyBeforeWarmup": "false"})
+        t_ready = await new_rs_ready(old_rs, 90)
+        green_ok = t_ready is not None and t_ready >= 10
         warm_flags = []
         for _ in range(2):
             rr = await do(c, "POST", "/generate", json={"prompt": "исправление"})
-            warm_flags.append(rr.json().get("warm"))
-        print(f"  GREEN исправление: readyz сразу после upgrade={r.status_code} "
-              f"(503={seen_503}), endpoints через {t_ready:.1f} c, warm ответов "
-              f"{warm_flags}")
-        ok = ok and seen_503 and all(warm_flags)
+            if rr.status_code == 200:
+                warm_flags.append(rr.json().get("warm"))
+        print(f"  GREEN исправление: Ready через {t_ready} c "
+              f"(не раньше прогрева: {green_ok}), ответы после готовности: "
+              f"{len(warm_flags)} из 2, warm={warm_flags}")
+        ok = ok and green_ok and len(warm_flags) == 2
     return ok
 
 
 async def check_rollback() -> bool:
-    """Helm upgrade на v2 → rollback к ревизии v1 → в ответах только v1."""
+    """Helm upgrade на v2 → rollback к предыдущей ревизии → в ответах v1."""
     async with httpx.AsyncClient(trust_env=False, timeout=30) as c:
         await forward(c)
-        await helm_set(image_tag="v4", model_version="sim-cpu-v2")
-        r = await do(c, "POST", "/generate", json={"prompt": "B"})
-        assert r.json()["model_id"] == "sim-cpu-v2", "rollout на v2 не дошёл"
+        await helm_set(wait=False, image_tag="v4", model_version="sim-cpu-v2")
+        got_v2 = await wait_model(c, "sim-cpu-v2")
+        print(f"  rollout на v2 дошёл по фактическим ответам: {got_v2}")
+        if not got_v2:
+            return False
         sh("helm rollback hw11")
         sh("kubectl rollout status deploy/hw11-service --timeout=120s")
         versions = []
@@ -215,6 +241,7 @@ async def check_interruptions() -> bool:
     с метриками; обрыв фиксирует клиент по таймауту.)"""
     async with httpx.AsyncClient(trust_env=False, timeout=30) as c:
         await forward(c)
+        ensure_prom_forward()
         prom = await prom_query(
             'sum(sim_requests_total{outcome="interrupted"}) or vector(0)')
         before = prom
@@ -226,6 +253,7 @@ async def check_interruptions() -> bool:
         except (asyncio.CancelledError, httpx.HTTPError):
             pass
         await asyncio.sleep(10)           # метрики доехали до Prometheus
+        ensure_prom_forward()
         after = await prom_query(
             'sum(sim_requests_total{outcome="interrupted"}) or vector(0)')
         print(f"  клиент оборвал стрим посреди ответа; счётчик interrupted: "
@@ -274,10 +302,8 @@ async def check_sessions() -> bool:
             "prompt": "продолжи", "session_id": "sb",
             "messages": [{"role": "user", "content": CTRL_B}]})
         pod_b1 = r.json()["pod"]
-        # фаза 2: заменить реплику, повторить диалог А с той же историей
-        name = sh("kubectl get pods -l app=hw11-service "
-                  "-o jsonpath='{.items[0].metadata.name}'").strip("'")
-        sh(f"kubectl delete pod {name} --wait=false")
+        # фаза 2: заменить РЕПЛИКУ КЛИЕНТА, повторить диалог А с историей
+        sh(f"kubectl delete pod {pod_a1} --wait=false")
         sh("kubectl rollout status deploy/hw11-service --timeout=120s")
         for _ in range(30):
             r = await do(c, "POST", "/generate", json={

@@ -10,14 +10,15 @@ LOG=logs/exp-C.log
 RAW=results/raw
 helm upgrade hw11 chart --set image.tag=v4 --set warm.seconds=5 \
   --set warm.readyBeforeWarmup=false --set limits.cpuBurnSeconds=0.25 \
+  --set limits.queueLimit=400 \
   --set modelVersion=sim-cpu-v1 --set autoscaling.enabled=false >>"$LOG" 2>&1
 kubectl rollout status deploy/hw11-service --timeout=120s >>"$LOG" 2>&1
 kubectl delete pod loadgen-0 loadgen-1 loadgen-2 loadgen-3 --force --grace-period=0 >>"$LOG" 2>&1 || true
 say() { echo "[$(date +%H:%M:%S)] $*" >>"$LOG"; }
-say "=== C4: переход HW11TTFCSlowP95 (нагрузка 3.6 rps при ёмкости ~2.7)"
+say "=== C4: переход HW11TTFCSlowP95 (4.8 rps при ёмкости ~2.7, queue_limit 400 — без обрезки отказами)"
 for i in 0 1 2 3; do
   kubectl run "loadgen-$i" --image=hw11-loadgen:v6 --restart=Never \
-    --env="LG_ARGS=--url http://hw11-service:8000 --client-id c$i --rps 0.9 --duration 300 --stream --sessions 8 --no-keepalive" \
+    --env="LG_ARGS=--url http://hw11-service:8000 --client-id c$i --rps 1.2 --duration 300 --stream --sessions 8 --no-keepalive" \
     --env="PYTHONUNBUFFERED=1" >>"$LOG" 2>&1
 done
 for t in $(seq 0 30); do

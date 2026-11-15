@@ -375,3 +375,17 @@ pod/loadgen-0 created
 pod/loadgen-1 created
 pod/loadgen-2 created
 pod/loadgen-3 created
+pod/loadgen-0 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-0" force deleted
+pod/loadgen-1 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-1" force deleted
+pod/loadgen-2 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-2" force deleted
+pod/loadgen-3 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-3" force deleted
+[16:49:00] C4: нагрузка снята — наблюдаем возврат в норму
+[16:50:45] === C4 завершён

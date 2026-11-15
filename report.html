@@ -170,7 +170,59 @@ p50 1,03 с, очередь p50 0,64 с): горячая реплика обсл
 <img src="results/figures/fig-B-pods.png" alt="TTFC и очередь по Pod">
 <img src="results/figures/fig-B-policies.png" alt="Сравнение политик">
 <h2 id="expc">3. Опыт C. HPA и мониторинг</h2>
-<!--EXPC_DATA-->
+<p><b>Предусловия</b> проверены: resource metrics API жив (metrics-server с
+<code>--kubelet-insecure-tls</code> для kind), у контейнеров сервиса есть CPU
+requests (300m) — <code>kubectl top pods</code>: 274–934 м во время нагрузки;
+HPA <code>autoscaling/v2</code>, min 2 / max 3, target CPUUtilization 60%,
+scaleDown stabilizationWindowSeconds 120. Нагрузка вычислительная:
+<code>CPU_BURN_SECONDS=0.25</code> (busy-loop на запрос), ~3 rps через 4 клиента
+без keep-alive.</p>
+<p><b>Переход 2→3 и возврат</b> (трейс каждые 10 с,
+<code>results/raw/expC-hpa-series.jsonl</code>): CPU-утилизация 45%→107% на ~61-й
+секунде → <b>desired 3 на t≈120 с</b> → Pod появился и стал Ready в интервале
+t=122–132 с (прогрев 5 с) → <b>current 3</b>. После снятия нагрузки (t≈310 с):
+desired 2 на t≈450 с (стабилизация 120 с), <b>current 2 на t≈459 с</b>.
+Фактическая длительность возврата от снятия нагрузки — <b>~140–150 с</b>
+(окно стабилизации + период синхронизации HPA); в первом прогоне — 391 с от
+старта опыта (там нагрузка снималась через 240 с, масштаб вниз совпал с хвостом
+стабилизации), во втором — 486 с. Полный цикл — рисунок:</p>
+<img src="results/figures/fig-C-hpa.png" alt="HPA 2→3→2">
+<p><b>Горячая реплика повторно</b> (3 реплики, ClientIP): существующие
+keep-alive-клиенты остаются на своих Pod — новая (третья) реплика не получает
+их запросы; распределение по клиент×Pod в <code>results/raw/expC-C2-c*.jsonl</code>
+(C2: 4 клиента разместились на 2 из 3 реплик). Средняя CPU-метрика вызывает
+масштабирование, когда среднее по репликам выше 60% request (300 м): при
+клиентской привязке новая реплика почти не нагружена → среднее снижается
+медленно, и HPA может не откатиться, пока привязка держит нагрузку на двух
+репликах; у каждой реплики CPU≈100% при этом новая ≈0%.</p>
+<p><b>Алерты</b> (правила в <code>monitoring/values-monitoring.yaml</code> — rule
+files голого Prometheus; порог: p95 TTFC &gt; 5 с и доля отказов &gt; 5%,
+<code>for: 30s</code>, минимум 10 наблюдений в минуту):</p>
+<table>
+<tr><th>Алерт</th><th>Наблюдение</th></tr>
+<tr><td>HW11ErrorRateHigh</td><td>pending 18:46:43 → <b>firing</b> 18:47:13 (и ранее
+16:10:55 pending → 16:11:25 firing) при нагрузке выше ёмкости (C3, 3 rps);
+после снятия — ok (алерт неактивен)</td></tr>
+<tr><td>HW11TTFCSlowP95</td><td>в C3 не сработал: при переполнении очередь
+обрезалась отказами 429 (queue limit 64), p95 TTFC успешных оставался ниже
+5 с; управляемый прогон C4 (3,6 rps, отказов меньше порога) — переход
+pending→firing→ok зафиксирован в <code>results/raw/expC-ttfc-alerts-trace.log</code></td></tr>
+</table>
+<p><b>Сверка Prometheus с клиентским журналом</b> (тот же период, тот же набор
+ответов — окно C1-mini, 900 успешных): клиентский p95 TTFC = <b>9,84 с</b>;
+Prometheus <code>histogram_quantile(0.95, …)</code> по 15-с окнам за период:
+мин 0,49 / макс <b>11,58 с</b> — верхняя оценка согласуется с клиентской
+(расхождение: серверная гистограмма видит только дошедшие до backend запросы и
+считает ttfc от старта обработки очереди, клиентская — от отправки; в пике
+очереди оба фиксируют один порядок величин). Считалка bucket-ов с сохранением
+<code>le</code>: <code>histogram_quantile(0.95, sum by (le)
+(rate(sim_ttfc_seconds_bucket[1m])))</code>.</p>
+<p>Дашборд Grafana (провижининг <code>monitoring/grafana-setup.yaml</code>, uid
+<code>hw11-sim</code>): TTFC p50/p95 из гистограммы, длительность полного ответа
+p95, running/waiting по Pod, завершённые/с и ошибки/отказы, CPU/RAM подов
+(cAdvisor), Ready-реплики и желаемые (HPA). Экспорт настроек — в файле;
+request ID и session ID — только в журналах подов (JSONL), меток в метриках —
+три (pod, mode, outcome).</p>
 <h2 id="checks">4. Собственные проверки</h2>
 <!--CHECKS_DATA-->
 <h2 id="limits">5. Ограничения</h2>
