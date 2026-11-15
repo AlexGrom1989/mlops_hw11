@@ -281,10 +281,12 @@ async def long_stream(c) -> str:
 async def prom_query(expr: str) -> float:
     import urllib.request
     import urllib.parse
+    # только прямой opener: системный прокси перехватывает и [::1] (503)
+    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
     url = ("http://[::1]:19090/api/v1/query?query=" + urllib.parse.quote(expr))
     for attempt in range(3):
         try:
-            with urllib.request.urlopen(url, timeout=10) as resp:
+            with opener.open(url, timeout=10) as resp:
                 d = json.load(resp)
             return float(d["data"]["result"][0]["value"][1]) if d["data"]["result"] else 0.0
         except (urllib.error.HTTPError, OSError) as e:

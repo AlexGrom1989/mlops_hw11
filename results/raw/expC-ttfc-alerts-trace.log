@@ -10,3 +10,29 @@
 17:06:10 {"status":"success","data":{"alerts":[{"labels":{"alertname":"HW11ErrorRateHigh","severity":"critical"},"annotations":{"description":"rejected+interrupted превышают 5% исходов 30 с подряд.","summary":"Доля отказов/оборванных выше 5%"},"state":"firing","activeAt":"2026-11-15T14:05:25.227245761Z","value":"4.3514351062599593e-01"}]}}
 17:06:25 {"status":"success","data":{"alerts":[{"labels":{"alertname":"HW11ErrorRateHigh","severity":"critical"},"annotations":{"description":"rejected+interrupted превышают 5% исходов 30 с подряд.","summary":"Доля отказов/оборванных выше 5%"},"state":"firing","activeAt":"2026-11-15T14:05:25.227245761Z","value":"3.5877947073890054e-01"}]}}
 17:06:40 {"status":"success","data":{"alerts":[]}}
+17:06:55 {"status":"success","data":{"alerts":[]}}
+17:07:10 {"status":"success","data":{"alerts":[{"labels":{"alertname":"HW11ErrorRateHigh","severity":"critical"},"annotations":{"description":"rejected+interrupted превышают 5% исходов 30 с подряд.","summary":"Доля отказов/оборванных выше 5%"},"state":"pending","activeAt":"2026-11-15T14:06:55.227245761Z","value":"5.272470092592148e-02"}]}}
+17:07:25 {"status":"success","data":{"alerts":[]}}
+17:07:40 {"status":"success","data":{"alerts":[]}}
+17:07:55 {"status":"success","data":{"alerts":[]}}
+17:08:10 {"status":"success","data":{"alerts":[]}}
+17:08:25 {"status":"success","data":{"alerts":[]}}
+17:08:40 {"status":"success","data":{"alerts":[]}}
+17:08:55 {"status":"success","data":{"alerts":[]}}
+17:09:10 {"status":"success","data":{"alerts":[]}}
+17:09:25 {"status":"success","data":{"alerts":[]}}
+17:09:40 {"status":"success","data":{"alerts":[]}}
+17:09:55 {"status":"success","data":{"alerts":[]}}
+17:10:10 {"status":"success","data":{"alerts":[]}}
+17:10:25 {"status":"success","data":{"alerts":[]}}
+17:10:40 {"status":"success","data":{"alerts":[]}}
+17:10:55 {"status":"success","data":{"alerts":[]}}
+17:11:10 {"status":"success","data":{"alerts":[]}}
+17:11:25 {"status":"success","data":{"alerts":[]}}
+17:11:41 {"status":"success","data":{"alerts":[]}}
+17:11:56 {"status":"success","data":{"alerts":[]}}
+17:12:11 {"status":"success","data":{"alerts":[]}}
+17:12:26 {"status":"success","data":{"alerts":[]}}
+17:12:41 {"status":"success","data":{"alerts":[]}}
+17:12:56 {"status":"success","data":{"alerts":[]}}
+17:13:11 {"status":"success","data":{"alerts":[]}}
