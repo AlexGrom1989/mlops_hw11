@@ -32,8 +32,9 @@ def sh(cmd: str, timeout: int = 300) -> str:
 
 
 def current_rs() -> str:
-    return sh("kubectl get pods -l app=hw11-service "
-              "-o jsonpath='{.items[0].metadata.name}'").strip("'").rsplit("-", 2)[0]
+    name = sh("kubectl get pods -l app=hw11-service "
+              "-o jsonpath='{.items[0].metadata.name}'").strip("'")
+    return "-".join(name.split("-")[:-2])
 
 
 async def new_rs_ready(old_rs: str, timeout_s: int) -> float | None:
@@ -44,7 +45,7 @@ async def new_rs_ready(old_rs: str, timeout_s: int) -> float | None:
         try:
             d = json.loads(out)
             for p in d["items"]:
-                if p["metadata"]["name"].rsplit("-", 2)[0] != old_rs:
+                if not p["metadata"]["name"].startswith(old_rs):
                     if any(c.get("ready") for c in
                            p["status"].get("containerStatuses", [])):
                         return time.monotonic() - t0
@@ -162,7 +163,7 @@ async def check_warmup() -> bool:
         await forward(c)
         # --- дефектный режим: helm без --wait, наблюдаем мгновенный Ready
         old_rs = current_rs()
-        await helm_set(wait=False, image_tag="v4",
+        await helm_set(wait=False, **{"image.tag": "v4"},
                        **{"warm.seconds": 12, "warm.readyBeforeWarmup": "true"})
         t_defect = await new_rs_ready(old_rs, 60)
         r = await do(c, "POST", "/generate", json={"prompt": "дефект-проверка"})
@@ -173,7 +174,7 @@ async def check_warmup() -> bool:
         ok = ok and r.status_code == 200 and warm_before_warm_done
         # --- исправление: тоже без --wait, следим за появлением Ready
         old_rs = current_rs()
-        await helm_set(wait=False, image_tag="v4",
+        await helm_set(wait=False, **{"image.tag": "v4"},
                        **{"warm.seconds": 12, "warm.readyBeforeWarmup": "false"})
         t_ready = await new_rs_ready(old_rs, 90)
         green_ok = t_ready is not None and t_ready >= 10
@@ -193,7 +194,7 @@ async def check_rollback() -> bool:
     """Helm upgrade на v2 → rollback к предыдущей ревизии → в ответах v1."""
     async with httpx.AsyncClient(trust_env=False, timeout=30) as c:
         await forward(c)
-        await helm_set(wait=False, image_tag="v4", model_version="sim-cpu-v2")
+        await helm_set(wait=False, **{"image.tag": "v4", "modelVersion": "sim-cpu-v2"})
         got_v2 = await wait_model(c, "sim-cpu-v2")
         print(f"  rollout на v2 дошёл по фактическим ответам: {got_v2}")
         if not got_v2:
@@ -207,7 +208,7 @@ async def check_rollback() -> bool:
         print(f"  версии в ответах после отката: {sorted(set(versions))} — "
               f"ожидался только sim-cpu-v1")
         ok = set(versions) == {"sim-cpu-v1"}
-    await helm_set(image_tag="v4", model_version="sim-cpu-v1")
+    await helm_set(**{"image.tag": "v4", "modelVersion": "sim-cpu-v1"})
     return ok
 
 
@@ -281,9 +282,16 @@ async def prom_query(expr: str) -> float:
     import urllib.request
     import urllib.parse
     url = ("http://[::1]:19090/api/v1/query?query=" + urllib.parse.quote(expr))
-    with urllib.request.urlopen(url, timeout=10) as resp:
-        d = json.load(resp)
-    return float(d["data"]["result"][0]["value"][1]) if d["data"]["result"] else 0.0
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(url, timeout=10) as resp:
+                d = json.load(resp)
+            return float(d["data"]["result"][0]["value"][1]) if d["data"]["result"] else 0.0
+        except (urllib.error.HTTPError, OSError) as e:
+            if attempt == 2:
+                raise
+            ensure_prom_forward()
+            await asyncio.sleep(2)
 
 
 async def check_sessions() -> bool:
@@ -345,9 +353,9 @@ async def main() -> None:
             results[name] = False
     print(json.dumps(results, ensure_ascii=False))
     # возврат стенда в рабочую конфигурацию опытов
-    await helm_set(image_tag="v4", **{"warm.seconds": 5,
-                                      "warm.readyBeforeWarmup": "false",
-                                      "model_version": "sim-cpu-v1"})
+    await helm_set(**{"image.tag": "v4", "warm.seconds": 5,
+                      "warm.readyBeforeWarmup": "false",
+                      "modelVersion": "sim-cpu-v1"})
     verdict = all(results.values())
     print("ИТОГ:", "все проверки зелёные" if verdict else "ЕСТЬ КРАСНЫЕ")
     return verdict

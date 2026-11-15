@@ -7,7 +7,7 @@ d = json.load(sys.stdin)
 new_ready = all_ready = new_total = 0
 for p in d["items"]:
     name = p["metadata"]["name"]
-    rs = name.rsplit("-", 2)[0]
+    rs = "-".join(name.split("-")[:-2])
     ready = any(c.get("ready") for c in p["status"].get("containerStatuses", []))
     all_ready += ready
     if rs != old_rs:

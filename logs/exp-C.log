@@ -389,3 +389,26 @@ Warning: Immediate deletion does not wait for confirmation that the running reso
 pod "loadgen-3" force deleted
 [16:49:00] C4: нагрузка снята — наблюдаем возврат в норму
 [16:50:45] === C4 завершён
+Release "hw11" has been upgraded. Happy Helming!
+NAME: hw11
+LAST DEPLOYED: Sun Nov 15 17:03:40 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 66
+TEST SUITE: None
+Waiting for deployment "hw11-service" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "hw11-service" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "hw11-service" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "hw11-service" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "hw11-service" rollout to finish: 1 old replicas are pending termination...
+deployment "hw11-service" successfully rolled out
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-0" not found
+Error from server (NotFound): pods "loadgen-1" not found
+Error from server (NotFound): pods "loadgen-2" not found
+Error from server (NotFound): pods "loadgen-3" not found
+[17:03:54] === C4: переход HW11TTFCSlowP95 (4.8 rps при ёмкости ~2.7, queue_limit 400 — без обрезки отказами)
+pod/loadgen-0 created
+pod/loadgen-1 created
+pod/loadgen-2 created
+pod/loadgen-3 created
