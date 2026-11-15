@@ -256,3 +256,122 @@ Warning: Immediate deletion does not wait for confirmation that the running reso
 pod "loadgen-3" force deleted
 [16:10:25] после снятия нагрузки: ожидаем ok алертов; наблюдение ещё 90 с
 [16:12:10] === опыт C завершён
+Release "hw11" has been upgraded. Happy Helming!
+NAME: hw11
+LAST DEPLOYED: Sun Nov 15 16:28:41 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 50
+TEST SUITE: None
+Waiting for deployment "hw11-service" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "hw11-service" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "hw11-service" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "hw11-service" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "hw11-service" rollout to finish: 1 old replicas are pending termination...
+deployment "hw11-service" successfully rolled out
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-0" not found
+Error from server (NotFound): pods "loadgen-1" not found
+Error from server (NotFound): pods "loadgen-2" not found
+Error from server (NotFound): pods "loadgen-3" not found
+pod/loadgen-0 created
+pod/loadgen-1 created
+pod/loadgen-2 created
+pod/loadgen-3 created
+[16:28:55] === C1-mini: трейс HPA на нагрузке ~3 rps
+[16:38:26] снимаю нагрузку; наблюдаю возврат к минимуму
+pod/loadgen-0 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-0" force deleted
+pod/loadgen-1 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-1" force deleted
+pod/loadgen-2 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-2" force deleted
+pod/loadgen-3 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-3" force deleted
+[16:38:28] возврат к 2 репликам через 573 с от старта
+[16:39:28] C1-mini клиентские итоги:
+  записей: 225 | исходы: {'completed': 225}
+  успешных: 225 | p50/p95 TTFC: 1.426/9.833 с | p50/p95 full: 1.778/10.186 с | p50/p95 queue: 1.992/9.660 с
+    pod hw11-service-568f69b579-zr8zp: 65 шт, TTFC p50 1.331 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-2m2rg: 62 шт, TTFC p50 0.750 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-rxbpt: 40 шт, TTFC p50 0.577 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-gc7x9: 24 шт, TTFC p50 8.539 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-fhx4v: 15 шт, TTFC p50 5.206 с, версии ['sim-cpu-v1']
+    pod hw11-service-6686d588d4-2nxvb: 14 шт, TTFC p50 8.973 с, версии ['sim-cpu-v1']
+    pod hw11-service-6686d588d4-gdtwl: 5 шт, TTFC p50 2.889 с, версии ['sim-cpu-v1']
+  версии в ответах: {'sim-cpu-v1': 225}
+  замедление генератора (sent−planned): макс 5.031 с, медиана 5.005 с
+  записей: 225 | исходы: {'completed': 225}
+  успешных: 225 | p50/p95 TTFC: 1.452/9.839 с | p50/p95 full: 1.804/10.190 с | p50/p95 queue: 1.805/9.846 с
+    pod hw11-service-568f69b579-zr8zp: 71 шт, TTFC p50 1.099 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-2m2rg: 61 шт, TTFC p50 1.272 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-rxbpt: 37 шт, TTFC p50 0.694 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-gc7x9: 25 шт, TTFC p50 6.740 с, версии ['sim-cpu-v1']
+    pod hw11-service-6686d588d4-2nxvb: 15 шт, TTFC p50 8.493 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-fhx4v: 12 шт, TTFC p50 6.669 с, версии ['sim-cpu-v1']
+    pod hw11-service-6686d588d4-gdtwl: 4 шт, TTFC p50 3.307 с, версии ['sim-cpu-v1']
+  версии в ответах: {'sim-cpu-v1': 225}
+  замедление генератора (sent−planned): макс 5.025 с, медиана 5.005 с
+  записей: 225 | исходы: {'completed': 225}
+  успешных: 225 | p50/p95 TTFC: 1.963/9.980 с | p50/p95 full: 2.314/10.331 с | p50/p95 queue: 1.891/9.711 с
+    pod hw11-service-568f69b579-zr8zp: 63 шт, TTFC p50 1.497 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-2m2rg: 55 шт, TTFC p50 1.777 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-rxbpt: 50 шт, TTFC p50 1.089 с, версии ['sim-cpu-v1']
+    pod hw11-service-6686d588d4-2nxvb: 20 шт, TTFC p50 9.189 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-gc7x9: 19 шт, TTFC p50 8.303 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-fhx4v: 16 шт, TTFC p50 6.766 с, версии ['sim-cpu-v1']
+    pod hw11-service-6686d588d4-gdtwl: 2 шт, TTFC p50 1.818 с, версии ['sim-cpu-v1']
+  версии в ответах: {'sim-cpu-v1': 225}
+  замедление генератора (sent−planned): макс 5.029 с, медиана 5.005 с
+  записей: 225 | исходы: {'completed': 225}
+  успешных: 225 | p50/p95 TTFC: 2.101/9.602 с | p50/p95 full: 2.453/9.955 с | p50/p95 queue: 1.860/9.377 с
+    pod hw11-service-568f69b579-2m2rg: 71 шт, TTFC p50 2.085 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-zr8zp: 58 шт, TTFC p50 1.809 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-rxbpt: 42 шт, TTFC p50 1.054 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-gc7x9: 24 шт, TTFC p50 6.843 с, версии ['sim-cpu-v1']
+    pod hw11-service-6686d588d4-2nxvb: 16 шт, TTFC p50 9.076 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-fhx4v: 11 шт, TTFC p50 6.495 с, версии ['sim-cpu-v1']
+    pod hw11-service-6686d588d4-gdtwl: 3 шт, TTFC p50 2.990 с, версии ['sim-cpu-v1']
+  версии в ответах: {'sim-cpu-v1': 225}
+  замедление генератора (sent−planned): макс 5.026 с, медиана 5.005 с
+[16:39:29] === C1-mini завершён
+Release "hw11" has been upgraded. Happy Helming!
+NAME: hw11
+LAST DEPLOYED: Sun Nov 15 16:39:46 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 53
+TEST SUITE: None
+deployment "hw11-service" successfully rolled out
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-0" not found
+Error from server (NotFound): pods "loadgen-1" not found
+Error from server (NotFound): pods "loadgen-2" not found
+Error from server (NotFound): pods "loadgen-3" not found
+[16:39:46] === C4: переход HW11TTFCSlowP95 (нагрузка 3.6 rps при ёмкости ~2.7)
+pod/loadgen-0 created
+pod/loadgen-1 created
+pod/loadgen-2 created
+pod/loadgen-3 created
+Release "hw11" has been upgraded. Happy Helming!
+NAME: hw11
+LAST DEPLOYED: Sun Nov 15 16:41:13 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 54
+TEST SUITE: None
+deployment "hw11-service" successfully rolled out
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-0" force deleted
+pod "loadgen-1" force deleted
+pod "loadgen-2" force deleted
+pod "loadgen-3" force deleted
+[16:41:13] === C4: переход HW11TTFCSlowP95 (нагрузка 3.6 rps при ёмкости ~2.7)
+pod/loadgen-0 created
+pod/loadgen-1 created
+pod/loadgen-2 created
+pod/loadgen-3 created

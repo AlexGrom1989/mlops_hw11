@@ -772,3 +772,20 @@ pod/loadgen-2 created
 Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
 Error from server (NotFound): pods "loadgen-3" not found
 pod/loadgen-3 created
+pod/loadgen-0 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-0" force deleted
+pod/loadgen-1 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-1" force deleted
+pod/loadgen-2 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-2" force deleted
+pod/loadgen-3 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-3" force deleted
+[B B4-hot80-noka run3] успешных 147 из 147
+  pod 568f69b579-s6qlw: 78 (53%), TTFC p50/p95 0.40/1.66 с, queue p50/p95 0.02/1.31 с, cache hit 78/78, клиенты ['c0', 'c1', 'c2', 'c3']
+  pod 568f69b579-fkdhj: 69 (47%), TTFC p50/p95 0.40/1.41 с, queue p50/p95 0.00/1.21 с, cache hit 69/69, клиенты ['c0', 'c1', 'c2', 'c3']
+  перекос: max доля реплики 53% (равномерно = 50%)
+[B] B4 повтор завершён

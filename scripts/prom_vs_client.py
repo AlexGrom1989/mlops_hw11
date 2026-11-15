@@ -19,12 +19,15 @@ def percentile(vals, q):
     return s[min(len(s) - 1, round(q / 100 * (len(s) - 1)))] if s else None
 
 
+OPENER = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+
+
 def prom_p95(start: float, end: float) -> tuple[float | None, float | None]:
     q = urllib.parse.quote(
         "histogram_quantile(0.95, sum by (le) (rate(sim_ttfc_seconds_bucket[1m])))")
-    url = (f"http://127.0.0.1:19090/api/v1/query_range?query={q}"
+    url = (f"http://[::1]:19090/api/v1/query_range?query={q}"
            f"&start={start}&end={end}&step=15")
-    with urllib.request.urlopen(url, timeout=30) as r:
+    with OPENER.open(url, timeout=30) as r:
         d = json.load(r)
     vals = [float(x[1]) for res in d["data"]["result"] for x in res["values"]]
     if not vals:

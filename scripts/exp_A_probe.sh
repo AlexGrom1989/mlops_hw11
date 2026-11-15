@@ -11,22 +11,9 @@ LOG=logs/exp-A.log
 probe() {  # $1 phase, $2 duration, $3 RS старого релиза (до фазы)
   local phase=$1 dur=$2 old_rs=$3 t0=$SECONDS
   for i in $(seq 0 $((dur / 2))); do
-    kubectl get pods -l app=hw11-service -o json 2>/dev/null | python3 - "$phase" "$((SECONDS - t0))" "$old_rs" >> "$OUT" <<'EOF'
-import json, sys
-phase, t, old_rs = sys.argv[1], int(sys.argv[2]), sys.argv[3]
-d = json.load(sys.stdin)
-new_ready = all_ready = new_total = 0
-for p in d["items"]:
-    name = p["metadata"]["name"]
-    rs = name.rsplit("-", 2)[0]
-    ready = any(c.get("ready") for c in p["status"].get("containerStatuses", []))
-    all_ready += ready
-    if rs != old_rs:
-        new_total += 1
-        new_ready += ready
-print(json.dumps({"phase": phase, "t": t, "ready_new": new_ready,
-                  "new_total": new_total, "ready_all": all_ready}))
-EOF
+    # python-код из файла: heredoc подменял бы stdin конвейера
+    kubectl get pods -l app=hw11-service -o json 2>/dev/null \
+      | python3 scripts/probe_row.py "$phase" "$((SECONDS - t0))" "$old_rs" >> "$OUT"
     sleep 2
   done
 }
