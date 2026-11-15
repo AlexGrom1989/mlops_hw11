@@ -34,9 +34,9 @@ snapshot() {  # <метка>: Ready + EndpointSlice + версии
 
 start_clients() {  # $1: LG_ARGS — один клиент-под (с хоста управляем моментом)
   kubectl delete pod loadgen-pod --force --grace-period=0 >/dev/null 2>&1
-  kubectl run loadgen-pod --image=hw11-loadgen:v5 --restart=Never \
+  kubectl run loadgen-pod --image=hw11-loadgen:v6 --restart=Never \
     -l job-name=loadgen-single \
-    --overrides='{"spec":{"containers":[{"name":"loadgen","image":"hw11-loadgen:v5","imagePullPolicy":"IfNotPresent","env":[{"name":"LG_ARGS","value":"'"$1"'"},{"name":"PYTHONUNBUFFERED","value":"1"}],"resources":{"limits":{"memory":"128Mi"}}}],"restartPolicy":"Never"}}' \
+    --overrides='{"spec":{"containers":[{"name":"loadgen","image":"hw11-loadgen:v6","imagePullPolicy":"IfNotPresent","env":[{"name":"LG_ARGS","value":"'"$1"'"},{"name":"PYTHONUNBUFFERED","value":"1"}],"resources":{"limits":{"memory":"128Mi"}}}],"restartPolicy":"Never"}}' \
     >>"$LOG" 2>&1
 }
 

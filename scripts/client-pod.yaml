@@ -17,7 +17,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: loadgen
-        image: hw11-loadgen:v5
+        image: hw11-loadgen:v6
         imagePullPolicy: IfNotPresent
         env:
         - name: LG_ARGS

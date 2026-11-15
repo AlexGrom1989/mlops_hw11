@@ -20,14 +20,14 @@ import httpx
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PORT = 18050
-BASE = f"http://127.0.0.1:{PORT}"
+# kubectl port-forward на занятый IPv4-порт хоста остаётся на [::1] —
+# обращаемся по IPv6 (урок порта 9090).
+BASE = f"http://[::1]:{PORT}"
 
 
 def sh(cmd: str, timeout: int = 300) -> str:
-    env = {**os.environ, "PATH": f"{os.environ['HOME']}/bin:" + os.environ["PATH"],
-           "NO_PROXY": "127.0.0.1,localhost", "no_proxy": "127.0.0.1,localhost"}
     r = subprocess.run(cmd, shell=True, capture_output=True, text=True,
-                       timeout=timeout, env=env, cwd=ROOT)
+                       timeout=timeout, env=_kubectl_env(), cwd=ROOT)
     return (r.stdout + r.stderr).strip()
 
 
@@ -55,20 +55,77 @@ async def helm_set(**kv) -> None:
     sh("kubectl rollout status deploy/hw11-service --timeout=120s")
 
 
+def _kubectl_env() -> dict:
+    return {**os.environ, "PATH": f"{os.environ['HOME']}/bin:" + os.environ["PATH"],
+            "NO_PROXY": "127.0.0.1,localhost", "no_proxy": "127.0.0.1,localhost"}
+
+
+def _port_alive(port: int) -> bool:
+    return b"LISTEN" in subprocess.run(["ss", "-ltn"], capture_output=True,
+                                       timeout=10).stdout.replace(f":{port}\n".encode(), b"LISTEN" + f":{port}".encode()) or False
+
+
 async def forward(client) -> None:
-    subprocess.Popen(["kubectl", "port-forward", "svc/hw11-service",
-                      f"{PORT}:8000"], cwd=ROOT,
-                     env={**os.environ, "NO_PROXY": "*"},
-                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-    for _ in range(30):
-        try:
-            r = await client.get(BASE + "/healthz", timeout=2)
-            if r.status_code == 200:
-                return
-        except OSError:
-            pass
-        await asyncio.sleep(0.5)
+    """Идемпотентный порт-форвард: старый туннель может указывать на
+    удалённый под — при отсутствии ответа пересоздаём принудительно."""
+    for attempt in range(3):
+        proc = subprocess.Popen(["kubectl", "port-forward", "svc/hw11-service",
+                                 f"{PORT}:8000"], cwd=ROOT, env=_kubectl_env(),
+                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        for _ in range(24):
+            try:
+                r = await client.get(BASE + "/healthz", timeout=2)
+                if r.status_code == 200:
+                    return
+            except (OSError, httpx.HTTPError):
+                pass
+            await asyncio.sleep(0.5)
+        # туннель мёртв: убиваем слушателя порта и пробуем снова
+        subprocess.run(f"fuser -k {PORT}/tcp 2>/dev/null; true", shell=True,
+                       timeout=10, env=_kubectl_env())
+        await asyncio.sleep(1)
     raise RuntimeError("порт-форвард не поднялся")
+
+
+def ensure_prom_forward() -> None:
+    """Prometheus-туннель 19090 жив? Если нет — поднимаем."""
+    out = subprocess.run(["bash", "-c",
+                          'curl -s --noproxy "*" -o /dev/null -w "%{http_code}" '
+                          '"http://[::1]:19090/-/healthy" || true'],
+                         capture_output=True, text=True, timeout=15,
+                         env=_kubectl_env())
+    if out.stdout.strip() == "200":
+        return
+    subprocess.run("fuser -k 19090/tcp 2>/dev/null; true", shell=True,
+                   timeout=10, env=_kubectl_env())
+    subprocess.Popen(["kubectl", "-n", "monitoring", "port-forward",
+                      "deploy/monitoring-prometheus-server", "19090:9090"],
+                     cwd=ROOT, env=_kubectl_env(),
+                     stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    for _ in range(20):
+        out = subprocess.run(["bash", "-c",
+                              'curl -s --noproxy "*" -o /dev/null -w "%{http_code}" '
+                              '"http://[::1]:19090/-/healthy" || true'],
+                             capture_output=True, text=True, timeout=10,
+                             env=_kubectl_env())
+        if out.stdout.strip() == "200":
+            return
+        time.sleep(1)
+    raise RuntimeError("порт-форвард Prometheus не поднялся")
+
+
+async def do(client, method: str, path: str, retries: int = 3, **kw):
+    """Запрос с автопереподключением: helm-операции меняют поды под
+    туннелем (svc→pod резолвится один раз), старый порт-форвард умирает."""
+    for attempt in range(retries):
+        try:
+            return await client.request(method, BASE + path, **kw)
+        except (httpx.RemoteProtocolError, httpx.ConnectError,
+                httpx.ReadError):
+            if attempt == retries - 1:
+                raise
+            await forward(client)
+            await asyncio.sleep(1)
 
 
 # ------------------------------------------------------------------ проверки
@@ -83,7 +140,7 @@ async def check_warmup() -> bool:
         await helm_set(image_tag="v4", **{"warm.seconds": 12,
                                           "warm.readyBeforeWarmup": "true"})
         t_defect = await wait_endpoints_ready(c, 1, 60)
-        r = await c.post(BASE + "/generate", json={"prompt": "дефект-проверка"})
+        r = await do(c, "POST", "/generate", json={"prompt": "дефект-проверка"})
         body = r.json()
         defect_served = r.status_code == 200
         print(f"  RED дефект: endpoints через {t_defect:.1f} c, ответ "
@@ -93,13 +150,13 @@ async def check_warmup() -> bool:
         # --- исправление
         await helm_set(image_tag="v4", **{"warm.seconds": 12,
                                           "warm.readyBeforeWarmup": "false"})
-        r = await c.get(BASE + "/readyz")
+        r = await do(c, "GET", "/readyz")
         t_ready = await wait_endpoints_ready(c, 2, 60)
         seen_503 = r.status_code == 503
         # теперь два запроса — оба от прогретой реплики
         warm_flags = []
         for _ in range(2):
-            rr = await c.post(BASE + "/generate", json={"prompt": "исправление"})
+            rr = await do(c, "POST", "/generate", json={"prompt": "исправление"})
             warm_flags.append(rr.json().get("warm"))
         print(f"  GREEN исправление: readyz сразу после upgrade={r.status_code} "
               f"(503={seen_503}), endpoints через {t_ready:.1f} c, warm ответов "
@@ -113,13 +170,13 @@ async def check_rollback() -> bool:
     async with httpx.AsyncClient(trust_env=False, timeout=30) as c:
         await forward(c)
         await helm_set(image_tag="v4", model_version="sim-cpu-v2")
-        r = await c.post(BASE + "/generate", json={"prompt": "B"})
+        r = await do(c, "POST", "/generate", json={"prompt": "B"})
         assert r.json()["model_id"] == "sim-cpu-v2", "rollout на v2 не дошёл"
         sh("helm rollback hw11")
         sh("kubectl rollout status deploy/hw11-service --timeout=120s")
         versions = []
         for _ in range(6):
-            r = await c.post(BASE + "/generate", json={"prompt": "после отката"})
+            r = await do(c, "POST", "/generate", json={"prompt": "после отката"})
             versions.append(r.json()["model_id"])
         print(f"  версии в ответах после отката: {sorted(set(versions))} — "
               f"ожидался только sim-cpu-v1")
@@ -132,7 +189,7 @@ async def check_pod_replace() -> bool:
     """Замена Pod: новая реплика грузит тот же артефакт (хеш из ConfigMap)."""
     async with httpx.AsyncClient(trust_env=False, timeout=30) as c:
         await forward(c)
-        r = await c.get(BASE + "/version")
+        r = await do(c, "GET", "/version")
         before = r.json()["artifact_sha256"]
         name = sh("kubectl get pods -l app=hw11-service "
                   "-o jsonpath='{.items[0].metadata.name}'").strip("'")
@@ -140,7 +197,7 @@ async def check_pod_replace() -> bool:
         sh("kubectl rollout status deploy/hw11-service --timeout=120s")
         ok_one = None
         for _ in range(30):
-            r = await c.post(BASE + "/generate", json={"prompt": "после замены"})
+            r = await do(c, "POST", "/generate", json={"prompt": "после замены"})
             if r.status_code == 200:
                 ok_one = r.json()
                 break
@@ -152,26 +209,28 @@ async def check_pod_replace() -> bool:
 
 
 async def check_interruptions() -> bool:
-    """Kill Pod во время потокового ответа: клиент видит interrupted,
-    серверный счётчик sim_requests_total{outcome=interrupted} растёт."""
+    """Учёт оборванных потоков: клиент обрывает соединение посреди стрима,
+    сервер фиксирует sim_requests_total{outcome=interrupted}.
+    (Смерть Pod'а — опыт A5: счётчик там не растёт, процесс умирает вместе
+    с метриками; обрыв фиксирует клиент по таймауту.)"""
     async with httpx.AsyncClient(trust_env=False, timeout=30) as c:
         await forward(c)
         prom = await prom_query(
             'sum(sim_requests_total{outcome="interrupted"}) or vector(0)')
         before = prom
         task = asyncio.create_task(long_stream(c))
-        await asyncio.sleep(1.5)          # стрим в середине
-        name = sh("kubectl get pods -l app=hw11-service "
-                  "-o jsonpath='{.items[0].metadata.name}'").strip("'")
-        sh(f"kubectl delete pod {name} --force --grace-period=0")
-        outcome = await task
-        await asyncio.sleep(8)            # метрики доехали до Prometheus
+        await asyncio.sleep(1.5)          # стрим в середине — рвём
+        task.cancel()
+        try:
+            await task
+        except (asyncio.CancelledError, httpx.HTTPError):
+            pass
+        await asyncio.sleep(10)           # метрики доехали до Prometheus
         after = await prom_query(
             'sum(sim_requests_total{outcome="interrupted"}) or vector(0)')
-        print(f"  клиент исход={outcome}, счётчик interrupted: {before} → "
-              f"{after} (вырос: {after > before})")
-        return outcome in ("interrupted", "client_error:ReadError",
-                           "client_error:RemoteProtocolError") and after > before
+        print(f"  клиент оборвал стрим посреди ответа; счётчик interrupted: "
+              f"{before} → {after} (вырос: {after > before})")
+        return after > before
 
 
 async def long_stream(c) -> str:
@@ -182,6 +241,10 @@ async def long_stream(c) -> str:
             async for _ in r.aiter_text():
                 pass
             return "completed"
+    except (httpx.RemoteProtocolError, httpx.ConnectError):
+        # туннель умер по внешней причине — не путать с обрывом эксперимента
+        await forward(c)
+        return "reconnected"
     except httpx.HTTPError:
         return "interrupted"
 
@@ -189,7 +252,7 @@ async def long_stream(c) -> str:
 async def prom_query(expr: str) -> float:
     import urllib.request
     import urllib.parse
-    url = ("http://127.0.0.1:19090/api/v1/query?query=" + urllib.parse.quote(expr))
+    url = ("http://[::1]:19090/api/v1/query?query=" + urllib.parse.quote(expr))
     with urllib.request.urlopen(url, timeout=10) as resp:
         d = json.load(resp)
     return float(d["data"]["result"][0]["value"][1]) if d["data"]["result"] else 0.0
@@ -203,11 +266,11 @@ async def check_sessions() -> bool:
     async with httpx.AsyncClient(trust_env=False, timeout=30) as c:
         await forward(c)
         # фаза 1: оба диалога, реплика не заменяется
-        r = await c.post(BASE + "/generate", json={
+        r = await do(c, "POST", "/generate", json={
             "prompt": "продолжи", "session_id": "sa",
             "messages": [{"role": "user", "content": CTRL_A}]})
         pod_a1, sha1 = r.json()["pod"], r.json()["artifact_sha256"]
-        r = await c.post(BASE + "/generate", json={
+        r = await do(c, "POST", "/generate", json={
             "prompt": "продолжи", "session_id": "sb",
             "messages": [{"role": "user", "content": CTRL_B}]})
         pod_b1 = r.json()["pod"]
@@ -217,7 +280,7 @@ async def check_sessions() -> bool:
         sh(f"kubectl delete pod {name} --wait=false")
         sh("kubectl rollout status deploy/hw11-service --timeout=120s")
         for _ in range(30):
-            r = await c.post(BASE + "/generate", json={
+            r = await do(c, "POST", "/generate", json={
                 "prompt": "повтор после замены", "session_id": "sa",
                 "messages": [{"role": "user", "content": CTRL_A}]})
             if r.status_code == 200:
@@ -245,6 +308,7 @@ CHECKS = {
 
 async def main() -> None:
     wanted = sys.argv[1:] or list(CHECKS)
+    ensure_prom_forward()
     results = {}
     for name in wanted:
         print(f"== {name}")
@@ -254,6 +318,10 @@ async def main() -> None:
             print(f"  ОШИБКА: {type(e).__name__}: {e}")
             results[name] = False
     print(json.dumps(results, ensure_ascii=False))
+    # возврат стенда в рабочую конфигурацию опытов
+    await helm_set(image_tag="v4", **{"warm.seconds": 5,
+                                      "warm.readyBeforeWarmup": "false",
+                                      "model_version": "sim-cpu-v1"})
     verdict = all(results.values())
     print("ИТОГ:", "все проверки зелёные" if verdict else "ЕСТЬ КРАСНЫЕ")
     return verdict

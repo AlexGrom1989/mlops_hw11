@@ -117,3 +117,142 @@ Warning: Immediate deletion does not wait for confirmation that the running reso
 pod "loadgen-3" force deleted
 [18:46:28] после снятия нагрузки: ожидаем ok алертов; наблюдение ещё 90 с
 [18:48:13] === опыт C завершён
+[15:55:53] === C0: базовая конфигурация: HPA 2..3, cpuBurn 0.25, target 60%
+Release "hw11" has been upgraded. Happy Helming!
+NAME: hw11
+LAST DEPLOYED: Sun Nov 15 15:55:53 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 41
+TEST SUITE: None
+deployment "hw11-service" successfully rolled out
+NAME           REFERENCE                 TARGETS              MINPODS   MAXPODS   REPLICAS   AGE
+hw11-service   Deployment/hw11-service   cpu: <unknown>/60%   2         3         2          105s
+[15:55:53] проверка resource metrics API и CPU requests:
+NAME                            CPU(cores)   MEMORY(bytes)   
+hw11-service-568f69b579-h5pb7   42m          34Mi            
+  hw11-service-568f69b579-h5pb7 requests: {'cpu': '300m', 'memory': '128Mi'}
+  hw11-service-568f69b579-m9sgk requests: {'cpu': '300m', 'memory': '128Mi'}
+  hw11-service-6686d588d4-rcltm requests: {'cpu': '300m', 'memory': '128Mi'}
+[15:55:53] === C1: нагрузка ~3 rps (вычислительная), наблюдение HPA каждые 10 с
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-0" not found
+pod/loadgen-0 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-1" not found
+pod/loadgen-1 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-2" not found
+pod/loadgen-2 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-3" not found
+pod/loadgen-3 created
+pod/loadgen-0 condition met
+pod/loadgen-1 condition met
+pod/loadgen-2 condition met
+pod/loadgen-3 condition met
+[16:01:30] снимаю нагрузку; возврат к минимуму наблюдаем отдельно
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-0" force deleted
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-1" force deleted
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-2" force deleted
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-3" force deleted
+[16:04:00] возврат к 2 репликам через 486 с от старта опыта
+[16:04:00] C1 клиентские итоги:
+  записей: 225 | исходы: {'completed': 225}
+  успешных: 225 | p50/p95 TTFC: 15.962/27.229 с | p50/p95 full: 16.315/27.582 с | p50/p95 queue: 15.653/26.829 с
+    pod hw11-service-568f69b579-h5pb7: 140 шт, TTFC p50 19.264 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-m9sgk: 78 шт, TTFC p50 9.417 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-t7qwm: 7 шт, TTFC p50 0.402 с, версии ['sim-cpu-v1']
+  версии в ответах: {'sim-cpu-v1': 225}
+  замедление генератора (sent−planned): макс 5.026 с, медиана 5.004 с
+  записей: 225 | исходы: {'completed': 225}
+  успешных: 225 | p50/p95 TTFC: 11.419/26.239 с | p50/p95 full: 11.771/26.590 с | p50/p95 queue: 11.440/25.838 с
+    pod hw11-service-568f69b579-m9sgk: 132 шт, TTFC p50 8.995 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-h5pb7: 79 шт, TTFC p50 19.640 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-t7qwm: 14 шт, TTFC p50 0.401 с, версии ['sim-cpu-v1']
+  версии в ответах: {'sim-cpu-v1': 225}
+  замедление генератора (sent−planned): макс 5.031 с, медиана 5.004 с
+  записей: 225 | исходы: {'completed': 225}
+  успешных: 225 | p50/p95 TTFC: 12.825/26.896 с | p50/p95 full: 13.178/27.248 с | p50/p95 queue: 12.438/26.494 с
+    pod hw11-service-568f69b579-m9sgk: 123 шт, TTFC p50 9.166 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-h5pb7: 99 шт, TTFC p50 19.623 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-t7qwm: 3 шт, TTFC p50 0.401 с, версии ['sim-cpu-v1']
+  версии в ответах: {'sim-cpu-v1': 225}
+  замедление генератора (sent−planned): макс 5.021 с, медиана 5.004 с
+  записей: 225 | исходы: {'completed': 224, 'expired': 1}
+  успешных: 224 | p50/p95 TTFC: 14.155/27.094 с | p50/p95 full: 14.506/27.446 с | p50/p95 queue: 14.425/26.693 с
+    pod hw11-service-568f69b579-h5pb7: 115 шт, TTFC p50 19.815 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-m9sgk: 87 шт, TTFC p50 11.014 с, версии ['sim-cpu-v1']
+    pod hw11-service-568f69b579-t7qwm: 22 шт, TTFC p50 0.401 с, версии ['sim-cpu-v1']
+  версии в ответах: {'sim-cpu-v1': 224}
+  замедление генератора (sent−planned): макс 5.029 с, медиана 5.004 с
+NAME           REFERENCE                 TARGETS       MINPODS   MAXPODS   REPLICAS   AGE
+hw11-service   Deployment/hw11-service   cpu: 1%/60%   2         3         2          9m52s
+[16:04:00] === C2: горячая реплика при 3 репликах с ClientIP-привязкой
+Release "hw11" has been upgraded. Happy Helming!
+NAME: hw11
+LAST DEPLOYED: Sun Nov 15 16:04:01 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 42
+TEST SUITE: None
+deployment.apps/hw11-service patched
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-0" not found
+pod/loadgen-0 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-1" not found
+pod/loadgen-1 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-2" not found
+pod/loadgen-2 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-3" not found
+pod/loadgen-3 created
+pod/loadgen-0 condition met
+pod/loadgen-1 condition met
+pod/loadgen-2 condition met
+pod/loadgen-3 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-0" force deleted
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-1" force deleted
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-2" force deleted
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-3" force deleted
+[16:06:24] C2 распределение при 3 репликах и привязке:
+  по Pod: Counter({'hw11-service-568f69b579-m9sgk': 135, 'hw11-service-568f69b579-h5pb7': 135, 'hw11-service-568f69b579-z4p9f': 47})
+  по клиенту x Pod:
+    c0 Counter({'568f69b579': 75})
+    c1 Counter({'568f69b579': 46})
+    c2 Counter({'568f69b579': 135})
+    c3 Counter({'568f69b579': 61})
+deployment.apps/hw11-service patched
+[16:06:24] === C3: алерты — нагрузка выше ёмкости
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-0" not found
+pod/loadgen-0 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-1" not found
+pod/loadgen-1 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-2" not found
+pod/loadgen-2 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-3" not found
+pod/loadgen-3 created
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-0" force deleted
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-1" force deleted
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-2" force deleted
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-3" force deleted
+[16:10:25] после снятия нагрузки: ожидаем ok алертов; наблюдение ещё 90 с
+[16:12:10] === опыт C завершён

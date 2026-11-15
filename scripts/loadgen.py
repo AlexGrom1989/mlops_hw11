@@ -111,6 +111,7 @@ async def one_request(client: httpx.AsyncClient, url: str, args,
                                    full_seconds=d["full_seconds"],
                                    queue_wait_seconds=d["queue_wait_seconds"],
                                    chunks_seen=d["chunks"],
+                                   cache=d["cache"],
                                    server_ttfc=d["ttfc_seconds"])
                         rec["outcome"] = "completed"
     except httpx.TimeoutException:
@@ -133,8 +134,12 @@ async def main_async(args) -> None:
     summary = {"client_id": args.client_id, "rps": args.rps, "duration": args.duration}
     url = args.url
     # Прогрев соединений до фазы измерения (не входит в статистику).
-    async with httpx.AsyncClient(trust_env=False, limits=httpx.Limits(
-            max_connections=64, keepalive_expiry=300)) as client:
+    if args.no_keepalive:
+        # Connection: close — каждый запрос балансируется заново (опыт B4)
+        limits = httpx.Limits(max_connections=64, max_keepalive_connections=0)
+    else:
+        limits = httpx.Limits(max_connections=64, keepalive_expiry=300)
+    async with httpx.AsyncClient(trust_env=False, limits=limits) as client:
         try:
             await client.get(url + "/healthz", timeout=5)
         except Exception:  # noqa: BLE001 — прогрев может не дожить до сервиса

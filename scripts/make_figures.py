@@ -137,34 +137,34 @@ def fig_b_policies() -> None:
 
 
 def fig_c_hpa() -> None:
-    trace = []
-    log = RAW / "expC-hpa-trace.log"
-    if log.exists():
-        for line in log.read_text().splitlines():
-            m = re.match(r"(\S+) (\S+) hpa: \((\d+), (\d+).*", line)
-            if m:
-                hh, mm, ss = m.group(2).split(":")
-                trace.append((int(hh) * 3600 + int(mm) * 60 + int(ss),
-                              int(m.group(3)), int(m.group(4))))
-    if trace:
-        t0 = trace[0][0]
-        t = [x[0] - t0 for x in trace]
-        fig, ax = plt.subplots(figsize=(10, 4.2))
-        ax.step(t, [x[1] for x in trace], where="post", label="фактические реплики")
-        ax.step(t, [x[2] for x in trace], where="post", ls="--",
-                label="желаемые (HPA desired)")
-        # фаза нагрузки: 0–240 с (старт клиентов в опыте C1)
-        ax.axvspan(0, 240, alpha=.15, color="#4878cf", label="нагрузка ~3 rps")
-        ax.set_xlabel("секунды от старта опыта C1")
-        ax.set_ylabel("реплики")
-        ax.set_title("Опыт C: HPA 2→3→2 по CPU (target 60%, stabilization 120 c,\n"
-                     "cpuBurn 0.25 с/запрос); фактическая длительность возврата — в REPORT")
-        ax.legend()
-        ax.set_ylim(1.5, 3.5)
-        fig.tight_layout()
-        fig.savefig(FIG / "fig-C-hpa.png", bbox_inches="tight")
-    else:
-        print("нет трассы HPA — график пропущен")
+    rows = load_jsonl(RAW / "expC-hpa-series.jsonl")
+    pts = []
+    for r in rows:
+        try:
+            pts.append((r["t"], int(r.get("desired") or 0),
+                        int(r.get("current") or 0)))
+        except (ValueError, TypeError):
+            continue
+    if not pts:
+        print("нет expC-hpa-series.jsonl — fig-C пропущено")
+        return
+    t0 = pts[0][0]
+    xs = [p[0] - t0 for p in pts]
+    fig, ax = plt.subplots(figsize=(10, 4.2))
+    ax.step(xs, [p[2] for p in pts], where="post", linewidth=2,
+            label="фактические реплики (current)")
+    ax.step(xs, [p[1] for p in pts], where="post", ls="--",
+            label="желаемые (HPA desired)")
+    # фаза нагрузки: до первого снятия (клиенты идут 300 с)
+    ax.axvspan(0, 300, alpha=.15, color="#4878cf", label="нагрузка ~3 rps")
+    ax.set_xlabel("секунды от старта опыта C1")
+    ax.set_ylabel("реплики")
+    ax.set_ylim(1.5, 3.5)
+    ax.set_title("Опыт C: HPA 2→3→2 по CPU (target 60%, stabilizationWindow 120 с,\n"
+                 "cpuBurn 0.25 с/запрос); фактическая длительность возврата — в REPORT")
+    ax.legend(loc="lower right", fontsize=9)
+    fig.tight_layout()
+    fig.savefig(FIG / "fig-C-hpa.png", bbox_inches="tight")
 
 
 if __name__ == "__main__":

@@ -26,3 +26,31 @@
 18:47:28 {"status":"success","data":{"alerts":[]}}
 18:47:43 {"status":"success","data":{"alerts":[]}}
 18:47:58 {"status":"success","data":{"alerts":[]}}
+16:06:24 {"status":"success","data":{"alerts":[{"labels":{"alertname":"HW11ErrorRateHigh","severity":"critical"},"annotations":{"description":"rejected+interrupted превышают 5% исходов 30 с подряд.","summary":"Доля отказов/оборванных выше 5%"},"state":"firing","activeAt":"2026-11-15T13:05:25.227245761Z","value":"5.319826620849818e-01"}]}}
+16:06:39 {"status":"success","data":{"alerts":[{"labels":{"alertname":"HW11ErrorRateHigh","severity":"critical"},"annotations":{"description":"rejected+interrupted превышают 5% исходов 30 с подряд.","summary":"Доля отказов/оборванных выше 5%"},"state":"firing","activeAt":"2026-11-15T13:05:25.227245761Z","value":"4.6524064171123e-01"}]}}
+16:06:54 {"status":"success","data":{"alerts":[{"labels":{"alertname":"HW11ErrorRateHigh","severity":"critical"},"annotations":{"description":"rejected+interrupted превышают 5% исходов 30 с подряд.","summary":"Доля отказов/оборванных выше 5%"},"state":"firing","activeAt":"2026-11-15T13:05:25.227245761Z","value":"4.173888039921807e-01"}]}}
+16:07:09 {"status":"success","data":{"alerts":[{"labels":{"alertname":"HW11ErrorRateHigh","severity":"critical"},"annotations":{"description":"rejected+interrupted превышают 5% исходов 30 с подряд.","summary":"Доля отказов/оборванных выше 5%"},"state":"firing","activeAt":"2026-11-15T13:05:25.227245761Z","value":"1.1250078123806441e-01"}]}}
+16:07:24 {"status":"success","data":{"alerts":[{"labels":{"alertname":"HW11ErrorRateHigh","severity":"critical"},"annotations":{"description":"rejected+interrupted превышают 5% исходов 30 с подряд.","summary":"Доля отказов/оборванных выше 5%"},"state":"firing","activeAt":"2026-11-15T13:05:25.227245761Z","value":"1e-01"}]}}
+16:07:39 {"status":"success","data":{"alerts":[]}}
+16:07:54 {"status":"success","data":{"alerts":[]}}
+16:08:09 {"status":"success","data":{"alerts":[]}}
+16:08:24 {"status":"success","data":{"alerts":[]}}
+16:08:39 {"status":"success","data":{"alerts":[]}}
+16:08:54 {"status":"success","data":{"alerts":[]}}
+16:09:10 {"status":"success","data":{"alerts":[]}}
+16:09:25 {"status":"success","data":{"alerts":[]}}
+16:09:40 {"status":"success","data":{"alerts":[]}}
+16:09:55 {"status":"success","data":{"alerts":[]}}
+16:10:10 {"status":"success","data":{"alerts":[]}}
+16:10:25 {"status":"success","data":{"alerts":[]}}
+16:10:25 {"status":"success","data":{"alerts":[]}}
+16:10:40 {"status":"success","data":{"alerts":[]}}
+16:10:40 {"status":"success","data":{"alerts":[]}}
+16:10:55 {"status":"success","data":{"alerts":[{"labels":{"alertname":"HW11ErrorRateHigh","severity":"critical"},"annotations":{"description":"rejected+interrupted превышают 5% исходов 30 с подряд.","summary":"Доля отказов/оборванных выше 5%"},"state":"pending","activeAt":"2026-11-15T13:10:40.227245761Z","value":"2.1088435374149658e-01"}]}}
+16:10:55 {"status":"success","data":{"alerts":[{"labels":{"alertname":"HW11ErrorRateHigh","severity":"critical"},"annotations":{"description":"rejected+interrupted превышают 5% исходов 30 с подряд.","summary":"Доля отказов/оборванных выше 5%"},"state":"pending","activeAt":"2026-11-15T13:10:40.227245761Z","value":"2.1088435374149658e-01"}]}}
+16:11:10 {"status":"success","data":{"alerts":[{"labels":{"alertname":"HW11ErrorRateHigh","severity":"critical"},"annotations":{"description":"rejected+interrupted превышают 5% исходов 30 с подряд.","summary":"Доля отказов/оборванных выше 5%"},"state":"pending","activeAt":"2026-11-15T13:10:40.227245761Z","value":"4.518518518518519e-01"}]}}
+16:11:10 {"status":"success","data":{"alerts":[{"labels":{"alertname":"HW11ErrorRateHigh","severity":"critical"},"annotations":{"description":"rejected+interrupted превышают 5% исходов 30 с подряд.","summary":"Доля отказов/оборванных выше 5%"},"state":"pending","activeAt":"2026-11-15T13:10:40.227245761Z","value":"4.518518518518519e-01"}]}}
+16:11:25 {"status":"success","data":{"alerts":[{"labels":{"alertname":"HW11ErrorRateHigh","severity":"critical"},"annotations":{"description":"rejected+interrupted превышают 5% исходов 30 с подряд.","summary":"Доля отказов/оборванных выше 5%"},"state":"firing","activeAt":"2026-11-15T13:10:40.227245761Z","value":"6.421052631578947e-01"}]}}
+16:11:25 {"status":"success","data":{"alerts":[{"labels":{"alertname":"HW11ErrorRateHigh","severity":"critical"},"annotations":{"description":"rejected+interrupted превышают 5% исходов 30 с подряд.","summary":"Доля отказов/оборванных выше 5%"},"state":"firing","activeAt":"2026-11-15T13:10:40.227245761Z","value":"6.421052631578947e-01"}]}}
+16:11:40 {"status":"success","data":{"alerts":[{"labels":{"alertname":"HW11ErrorRateHigh","severity":"critical"},"annotations":{"description":"rejected+interrupted превышают 5% исходов 30 с подряд.","summary":"Доля отказов/оборванных выше 5%"},"state":"firing","activeAt":"2026-11-15T13:10:40.227245761Z","value":"9.677419354838709e-01"}]}}
+16:11:55 {"status":"success","data":{"alerts":[]}}

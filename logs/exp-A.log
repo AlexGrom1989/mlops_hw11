@@ -253,3 +253,30 @@ NAMESPACE: default
 STATUS: deployed
 REVISION: 33
 TEST SUITE: None
+Release "hw11" has been upgraded. Happy Helming!
+NAME: hw11
+LAST DEPLOYED: Sun Nov 15 15:54:07 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 38
+TEST SUITE: None
+Release "hw11" has been upgraded. Happy Helming!
+NAME: hw11
+LAST DEPLOYED: Sun Nov 15 15:54:53 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 39
+TEST SUITE: None
+Release "hw11" has been upgraded. Happy Helming!
+NAME: hw11
+LAST DEPLOYED: Sun Nov 15 15:55:38 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 40
+TEST SUITE: None
+Waiting for deployment "hw11-service" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "hw11-service" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "hw11-service" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "hw11-service" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "hw11-service" rollout to finish: 1 old replicas are pending termination...
+deployment "hw11-service" successfully rolled out
