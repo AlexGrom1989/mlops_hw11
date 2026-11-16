@@ -31,6 +31,18 @@ def sh(cmd: str, timeout: int = 300) -> str:
     return (r.stdout + r.stderr).strip()
 
 
+def checks_dump() -> str:
+    import subprocess
+    return checks_sh("kubectl get pods -l app=hw11-service -o custom-columns=N:.metadata.name,R:.status.containerStatuses[0].ready")
+
+
+def checks_sh(cmd: str) -> str:
+    import subprocess
+    r = subprocess.run(cmd, shell=True, capture_output=True, text=True,
+                       timeout=60, env=_kubectl_env(), cwd=ROOT)
+    return (r.stdout + r.stderr).strip()
+
+
 def current_rs() -> str:
     name = sh("kubectl get pods -l app=hw11-service "
               "-o jsonpath='{.items[0].metadata.name}'").strip("'")
@@ -173,6 +185,9 @@ async def check_warmup() -> bool:
         await helm_set(wait=False, **{"image.tag": "v4"},
                        **{"warm.seconds": 12, "warm.readyBeforeWarmup": "true"})
         t_defect = await new_rs_ready(old_rs, 60, warm=12)
+        if t_defect is None:
+            print("  [диагностика] old_rs:", old_rs)
+            print(checks_dump())
         r = await do(c, "POST", "/generate", json={"prompt": "дефект-проверка"})
         warm_before_warm_done = t_defect is not None and t_defect < 12
         print(f"  RED дефект: новая реплика Ready через {t_defect} c после "
@@ -269,7 +284,8 @@ async def check_interruptions() -> bool:
             await task
         except (asyncio.CancelledError, httpx.HTTPError):
             pass
-        await asyncio.sleep(10)           # метрики доехали до Prometheus
+        await c.aclose()  # рвём TCP сразу: иначе keep-alive вернёт соединение в пул без разрыва
+        await asyncio.sleep(20)           # метрики доехали до Prometheus
         ensure_prom_forward()
         after = await prom_query(
             'sum(sim_requests_total{outcome="interrupted"}) or vector(0)')

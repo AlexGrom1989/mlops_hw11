@@ -1,0 +1,5 @@
+== interruptions
+  клиент оборвал стрим посреди ответа; счётчик interrupted: 0.0 → 1.0 (вырос: True)
+{"interruptions": true}
+ИТОГ: все проверки зелёные
+rc=0

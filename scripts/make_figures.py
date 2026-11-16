@@ -85,17 +85,17 @@ def fig_b_pods() -> None:
         by_pod.setdefault(r.get("pod"), []).append(r)
     pods = sorted(by_pod)
     ttfc = [percentile([r["ttfc_seconds"] for r in by_pod[p]], 50) for p in pods]
-    queue = [percentile([r["queue_wait_seconds"] for r in by_pod[p]], 50) for p in pods]
+    queue = [percentile([r["queue_wait_seconds"] for r in by_pod[p]], 95) for p in pods]
     share = [100 * len(by_pod[p]) / len(ok) for p in pods]
     x = range(len(pods))
     fig, (a1, a2) = plt.subplots(1, 2, figsize=(11, 4.2))
     a1.bar([i - .2 for i in x], ttfc, .4, label="TTFC p50, с")
-    a1.bar([i + .2 for i in x], queue, .4, label="очередь p50, с")
-    a1.set_xticks(list(x), [p.split("-")[-2][-4:] + "…" for p in pods])
+    a1.bar([i + .2 for i in x], queue, .4, label="очередь p95, с")
+    a1.set_xticks(list(x), [p.split("-")[-1] for p in pods])
     a1.set_ylabel("секунды"); a1.legend()
     a1.set_title("Задержка и очередь по реплике\n(hot80, обычный Service, прогон 1)")
     a2.bar(list(x), share, color=["crimson" if s > 60 else "#4878cf" for s in share])
-    a2.set_xticks(list(x), [p.split("-")[-2][-4:] + "…" for p in pods])
+    a2.set_xticks(list(x), [p.split("-")[-1] for p in pods])
     a2.set_ylabel("% запросов")
     a2.set_title("Распределение запросов по репликам\n(равномерно = 50%)")
     fig.tight_layout()
