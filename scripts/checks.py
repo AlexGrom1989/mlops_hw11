@@ -34,11 +34,13 @@ def sh(cmd: str, timeout: int = 300) -> str:
 def current_rs() -> str:
     name = sh("kubectl get pods -l app=hw11-service "
               "-o jsonpath='{.items[0].metadata.name}'").strip("'")
-    return "-".join(name.split("-")[:-2])
+    return name.rsplit("-", 1)[0]  # RS: всё кроме суффикса пода
 
 
-async def new_rs_ready(old_rs: str, timeout_s: int) -> float | None:
-    """Ждём первый Ready-под НОВОГО RS; возвращаем секунды ожидания."""
+async def new_rs_ready(old_rs: str, timeout_s: int, warm: int) -> float | None:
+    """Ждём первый Ready-под НОВОГО RS; возвращаем разность
+    «Ready минус startTime пода» в секундах: она меньше warm только если
+    реплика стала готовой ДО завершения собственного прогрева (дефект)."""
     t0 = time.monotonic()
     while time.monotonic() - t0 < timeout_s:
         out = sh("kubectl get pods -l app=hw11-service -o json")
@@ -48,7 +50,12 @@ async def new_rs_ready(old_rs: str, timeout_s: int) -> float | None:
                 if not p["metadata"]["name"].startswith(old_rs):
                     if any(c.get("ready") for c in
                            p["status"].get("containerStatuses", [])):
-                        return time.monotonic() - t0
+                        import datetime as dt
+                        started = dt.datetime.strptime(
+                            p["status"]["startTime"], "%Y-%m-%dT%H:%M:%SZ")
+                        started = started.replace(tzinfo=dt.timezone.utc)
+                        delta = dt.datetime.now(dt.timezone.utc) - started
+                        return delta.total_seconds()
         except ValueError:
             pass
         await asyncio.sleep(1)
@@ -165,27 +172,28 @@ async def check_warmup() -> bool:
         old_rs = current_rs()
         await helm_set(wait=False, **{"image.tag": "v4"},
                        **{"warm.seconds": 12, "warm.readyBeforeWarmup": "true"})
-        t_defect = await new_rs_ready(old_rs, 60)
+        t_defect = await new_rs_ready(old_rs, 60, warm=12)
         r = await do(c, "POST", "/generate", json={"prompt": "дефект-проверка"})
-        warm_before_warm_done = t_defect is not None and t_defect < 10
-        print(f"  RED дефект: новая реплика Ready через {t_defect} c "
-              f"(прогрев 12 c), запрос при прогреве status={r.status_code} "
-              f"— {'дефект подтверждён' if warm_before_warm_done else '?'}")
+        warm_before_warm_done = t_defect is not None and t_defect < 12
+        print(f"  RED дефект: новая реплика Ready через {t_defect} c после "
+              f"своего старта (прогрев 12 c), запрос при прогреве "
+              f"status={r.status_code} — "
+              f"{'дефект подтверждён' if warm_before_warm_done else '?'}")
         ok = ok and r.status_code == 200 and warm_before_warm_done
         # --- исправление: тоже без --wait, следим за появлением Ready
         old_rs = current_rs()
         await helm_set(wait=False, **{"image.tag": "v4"},
                        **{"warm.seconds": 12, "warm.readyBeforeWarmup": "false"})
-        t_ready = await new_rs_ready(old_rs, 90)
-        green_ok = t_ready is not None and t_ready >= 10
+        t_ready = await new_rs_ready(old_rs, 120, warm=12)
+        green_ok = t_ready is not None and t_ready >= 12
         warm_flags = []
         for _ in range(2):
             rr = await do(c, "POST", "/generate", json={"prompt": "исправление"})
             if rr.status_code == 200:
                 warm_flags.append(rr.json().get("warm"))
-        print(f"  GREEN исправление: Ready через {t_ready} c "
-              f"(не раньше прогрева: {green_ok}), ответы после готовности: "
-              f"{len(warm_flags)} из 2, warm={warm_flags}")
+        print(f"  GREEN исправление: Ready через {t_ready} c после старта "
+              f"(не раньше 12 c прогрева: {green_ok}), ответы после "
+              f"готовности: {len(warm_flags)} из 2, warm={warm_flags}")
         ok = ok and green_ok and len(warm_flags) == 2
     return ok
 

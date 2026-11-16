@@ -18,11 +18,11 @@ probe() {  # $1 phase, $2 duration, $3 RS старого релиза (до фа
   done
 }
 
-N=$(kubectl get pods -l app=hw11-service -o jsonpath='{.items[0].metadata.name}'); OLD_RS="${N%-*}"; OLD_RS="${OLD_RS%-*}"
+N=$(kubectl get pods -l app=hw11-service -o jsonpath='{.items[0].metadata.name}'); OLD_RS="${N%-*}"
 helm upgrade hw11 chart --set image.tag=v4 --set warm.seconds=20 \
   --set warm.readyBeforeWarmup=true --set limits.cpuBurnSeconds=0.25 >>"$LOG" 2>&1
 probe defect 40 "$OLD_RS"
-N=$(kubectl get pods -l app=hw11-service -o jsonpath='{.items[0].metadata.name}'); NEW_RS="${N%-*}"; NEW_RS="${NEW_RS%-*}"
+N=$(kubectl get pods -l app=hw11-service -o jsonpath='{.items[0].metadata.name}'); NEW_RS="${N%-*}"
 helm upgrade hw11 chart --set image.tag=v4 --set warm.seconds=20 \
   --set warm.readyBeforeWarmup=false --set limits.cpuBurnSeconds=0.25 >>"$LOG" 2>&1
 probe fixed 40 "$NEW_RS"
