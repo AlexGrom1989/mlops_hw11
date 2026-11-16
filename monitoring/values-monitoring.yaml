@@ -5,13 +5,14 @@ serverFiles:
     groups:
     - name: hw11-service
       rules:
-      # p95 времени до первой части ответа выше 5 с при живом трафике.
+      # p95 времени до первой части ответа выше 5 с при живом трафике
+      # (минимум 10 наблюдений в минуту — increase, не rate: 10/мин = 0.167/с).
       - alert: HW11TTFCSlowP95
         expr: |
           histogram_quantile(0.95,
             sum by (le) (rate(sim_ttfc_seconds_bucket[1m]))) > 5
           and
-          sum(rate(sim_ttfc_seconds_count[1m])) > 10
+          sum(increase(sim_ttfc_seconds_count[1m])) > 10
         for: 30s
         labels:
           severity: warning

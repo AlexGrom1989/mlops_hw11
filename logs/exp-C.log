@@ -426,3 +426,72 @@ Warning: Immediate deletion does not wait for confirmation that the running reso
 pod "loadgen-3" force deleted
 [17:11:41] C4: нагрузка снята — наблюдаем возврат в норму
 [17:13:26] === C4 завершён
+Release "hw11" has been upgraded. Happy Helming!
+NAME: hw11
+LAST DEPLOYED: Sun Nov 15 17:21:57 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 80
+TEST SUITE: None
+Waiting for deployment "hw11-service" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "hw11-service" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "hw11-service" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "hw11-service" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "hw11-service" rollout to finish: 1 old replicas are pending termination...
+deployment "hw11-service" successfully rolled out
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-0" not found
+Error from server (NotFound): pods "loadgen-1" not found
+Error from server (NotFound): pods "loadgen-2" not found
+Error from server (NotFound): pods "loadgen-3" not found
+[17:22:12] === C4: переход HW11TTFCSlowP95 (4.8 rps при ёмкости ~2.7, queue_limit 400 — без обрезки отказами)
+pod/loadgen-0 created
+pod/loadgen-1 created
+pod/loadgen-2 created
+pod/loadgen-3 created
+pod/loadgen-0 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-0" force deleted
+pod/loadgen-1 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-1" force deleted
+pod/loadgen-2 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-2" force deleted
+pod/loadgen-3 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-3" force deleted
+[17:29:59] C4: нагрузка снята — наблюдаем возврат в норму
+[17:31:44] === C4 завершён
+Release "hw11" has been upgraded. Happy Helming!
+NAME: hw11
+LAST DEPLOYED: Sun Nov 15 17:35:02 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 81
+TEST SUITE: None
+deployment "hw11-service" successfully rolled out
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+Error from server (NotFound): pods "loadgen-0" not found
+Error from server (NotFound): pods "loadgen-1" not found
+Error from server (NotFound): pods "loadgen-2" not found
+Error from server (NotFound): pods "loadgen-3" not found
+[17:35:03] === C4: переход HW11TTFCSlowP95 (4.8 rps при ёмкости ~2.7, queue_limit 400 — без обрезки отказами)
+pod/loadgen-0 created
+pod/loadgen-1 created
+pod/loadgen-2 created
+pod/loadgen-3 created
+pod/loadgen-0 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-0" force deleted
+pod/loadgen-1 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-1" force deleted
+pod/loadgen-2 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-2" force deleted
+pod/loadgen-3 condition met
+Warning: Immediate deletion does not wait for confirmation that the running resource has been terminated. The resource may continue to run on the cluster indefinitely.
+pod "loadgen-3" force deleted
+[17:42:50] C4: нагрузка снята — наблюдаем возврат в норму
+[17:44:35] === C4 завершён

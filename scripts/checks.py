@@ -201,13 +201,21 @@ async def check_rollback() -> bool:
             return False
         sh("helm rollback hw11")
         sh("kubectl rollout status deploy/hw11-service --timeout=120s")
-        versions = []
-        for _ in range(6):
+        # ждём стабилизации: 5 ответов подряд от v1 (старые v2-поды уходят
+        # не мгновенно при maxUnavailable=0)
+        consecutive_v1 = 0
+        versions_seen = set()
+        for _ in range(40):
             r = await do(c, "POST", "/generate", json={"prompt": "после отката"})
-            versions.append(r.json()["model_id"])
-        print(f"  версии в ответах после отката: {sorted(set(versions))} — "
-              f"ожидался только sim-cpu-v1")
-        ok = set(versions) == {"sim-cpu-v1"}
+            mid = r.json()["model_id"]
+            versions_seen.add(mid)
+            consecutive_v1 = consecutive_v1 + 1 if mid == "sim-cpu-v1" else 0
+            if consecutive_v1 >= 5:
+                break
+            await asyncio.sleep(2)
+        print(f"  версии в окне отката: {sorted(versions_seen)}; "
+              f"5 подряд sim-cpu-v1: {consecutive_v1 >= 5}")
+        ok = consecutive_v1 >= 5 and set(versions_seen) <= {"sim-cpu-v1", "sim-cpu-v2"}
     await helm_set(**{"image.tag": "v4", "modelVersion": "sim-cpu-v1"})
     return ok
 
