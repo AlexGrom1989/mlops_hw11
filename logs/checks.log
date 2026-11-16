@@ -1,0 +1,15 @@
+== warmup
+  RED дефект: новая реплика Ready через 3.76807 c после своего старта (прогрев 12 c), запрос при прогреве status=200 — дефект подтверждён
+  GREEN исправление: Ready через 81.811468 c после старта (не раньше 12 c прогрева: True), ответы после готовности: 2 из 2, warm=[True, True]
+== rollback
+  rollout на v2 дошёл по фактическим ответам: True
+  версии в окне отката: ['sim-cpu-v1', 'sim-cpu-v2']; 5 подряд sim-cpu-v1: True
+== pod_replace
+  Pod hw11-service-6c5dff9464-hcfgp удалён; новая реплика: model_id=sim-cpu-v1, хеш совпал: True
+== interruptions
+  клиент оборвал стрим посреди ответа; счётчик interrupted: 0.0 → 1.0 (вырос: True)
+== sessions
+  диалог А: реплики hw11-service-6c5dff9464-srfv8 → hw11-service-6c5dff9464-ktbqz (заменена: True), хеш артефакта стабилен: True; диалог Б отвечен другой репликой: True
+{"warmup": true, "rollback": true, "pod_replace": true, "interruptions": true, "sessions": true}
+ИТОГ: все проверки зелёные
+rc=0

@@ -334,3 +334,17 @@ Waiting for deployment "hw11-service" rollout to finish: 1 out of 2 new replicas
 Waiting for deployment "hw11-service" rollout to finish: 1 old replicas are pending termination...
 Waiting for deployment "hw11-service" rollout to finish: 1 old replicas are pending termination...
 deployment "hw11-service" successfully rolled out
+Release "hw11" has been upgraded. Happy Helming!
+NAME: hw11
+LAST DEPLOYED: Mon Nov 16 18:21:09 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 119
+TEST SUITE: None
+Release "hw11" has been upgraded. Happy Helming!
+NAME: hw11
+LAST DEPLOYED: Mon Nov 16 18:21:53 2026
+NAMESPACE: default
+STATUS: deployed
+REVISION: 120
+TEST SUITE: None
